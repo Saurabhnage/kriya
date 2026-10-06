@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const user = parseUser(body.user);
     const input = await decisionInput(user, body.risks);
     const p = await propose(input);
-    if (body.journal !== false && Date.now() - p.createdAt < 5_000) journalProposal(user, p, input.strategies);
+    if (body.journal !== false && Date.now() - p.createdAt < 5_000) await journalProposal(user, p, input.strategies);
     return json({
       user,
       strategies: p.allocation.map((a) => a.strategy),

@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 // External risk data source consumed by the Chainlink CRE workflow (and the local keeper).
 // GET returns a deterministic, sorted list so every CRE node reaches identical consensus.
 export async function GET() {
-  const feed = getRiskFeed();
+  const feed = await getRiskFeed();
   const strategies = Object.entries(feed.risks)
     .map(([address, risk]) => ({ address, risk }))
     .sort((a, b) => a.address.localeCompare(b.address));
@@ -19,8 +19,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     if (body.reset) {
-      const feed = resetRiskFeed();
-      journal({ kind: "reality", title: "External risk feed reset to baseline" });
+      const feed = await resetRiskFeed();
+      await journal({ kind: "reality", title: "External risk feed reset to baseline" });
       return json(feed);
     }
     const risk = Number(body.risk);
@@ -28,9 +28,9 @@ export async function POST(request: Request) {
     const strategies = await readStrategies();
     const s = strategies.find((x) => x.address.toLowerCase() === String(body.strategy).toLowerCase());
     if (!s) throw new Error("unknown strategy");
-    const before = getRiskFeed().risks[s.address.toLowerCase()] ?? s.risk;
-    const feed = setRisk(s.address, risk);
-    journal({ kind: "reality", title: `External risk feed: ${s.name.split(" - ")[0]} risk ${before} → ${risk}`, detail: "Reality changed. Awaiting verification." });
+    const before = (await getRiskFeed()).risks[s.address.toLowerCase()] ?? s.risk;
+    const feed = await setRisk(s.address, risk);
+    await journal({ kind: "reality", title: `External risk feed: ${s.name.split(" - ")[0]} risk ${before} → ${risk}`, detail: "Reality changed. Awaiting verification." });
     return json(feed);
   } catch (err) {
     return fail(err, 400);

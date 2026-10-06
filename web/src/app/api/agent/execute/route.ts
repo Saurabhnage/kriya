@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const user = parseUser((await request.json()).user);
     const input = await decisionInput(user);
     const p = await propose(input);
-    journalProposal(user, p, input.strategies);
+    await journalProposal(user, p, input.strategies);
     if (!p.validation.ok) throw new Error(`${p.validation.error}: ${p.validation.detail}`);
     const hash = await executeViaAgent(user, p);
     return json({ hash, proposal: p });

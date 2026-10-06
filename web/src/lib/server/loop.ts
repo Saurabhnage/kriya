@@ -71,20 +71,20 @@ export async function executeViaAgent(user: Address, proposal: Proposal): Promis
   return hash;
 }
 
-export function journalProposal(user: Address, p: Proposal, strategies: StrategyView[]) {
+export async function journalProposal(user: Address, p: Proposal, strategies: StrategyView[]) {
   const mix = [...p.allocation.map((a) => `${name(strategies, a.strategy)} ${a.bps / 100}%`)];
   if (p.validation.ok) mix.push(`Reserve ${p.validation.reserveBps / 100}%`);
   if (p.llmRejected?.error === "LLMUnavailable") {
-    journal({ user, kind: "reject", title: "LLM unavailable: deterministic optimizer used", detail: p.llmRejected.detail });
+    await journal({ user, kind: "reject", title: "LLM unavailable: deterministic optimizer used", detail: p.llmRejected.detail });
   } else if (p.llmRejected) {
-    journal({
+    await journal({
       user,
       kind: "reject",
       title: `LLM proposal rejected by policy engine: ${p.llmRejected.error}`,
       detail: `${p.llmRejected.detail}. Falling back to the deterministic optimizer.`,
     });
   }
-  journal({
+  await journal({
     user,
     kind: "decide",
     title: `${p.engine === "llm" ? `AI decision (${p.model})` : "Deterministic decision"}: ${mix.join(" · ")}`,
@@ -92,7 +92,7 @@ export function journalProposal(user: Address, p: Proposal, strategies: Strategy
     data: p,
   });
   if (p.validation.ok) {
-    journal({
+    await journal({
       user,
       kind: "constrain",
       title: `Mandate check passed: portfolio risk ${p.validation.portfolioRisk}, expected APY ${(p.validation.expectedApyBps / 100).toFixed(2)}%`,
@@ -108,7 +108,7 @@ export type LoopStep = { step: string; status: "ok" | "skip" | "warn" | "error";
  */
 export async function runKeeper(only?: Address): Promise<LoopStep[]> {
   const steps: LoopStep[] = [];
-  const feed = getRiskFeed();
+  const feed = await getRiskFeed();
   const onchain = await readStrategies();
   steps.push({
     step: "OBSERVE",
@@ -132,7 +132,7 @@ export async function runKeeper(only?: Address): Promise<LoopStep[]> {
     await publicClient.waitForTransactionReceipt({ hash });
     const detail = changed.map((s) => `${name(onchain, s.address)} ${s.risk} → ${feed.risks[s.address.toLowerCase()]}`).join(", ");
     steps.push({ step: "VERIFY", status: "ok", detail: `Risk scores updated onchain: ${detail}`, txHash: hash });
-    journal({ kind: "verify", title: `Keeper verified risk change: ${detail}`, txHash: hash });
+    await journal({ kind: "verify", title: `Keeper verified risk change: ${detail}`, txHash: hash });
   } else {
     steps.push({ step: "VERIFY", status: "skip", detail: "Onchain risk scores match the feed" });
   }
@@ -157,10 +157,10 @@ export async function runKeeper(only?: Address): Promise<LoopStep[]> {
       status: "warn",
       detail: `${user.slice(0, 8)}: ${h.allocated ? `mandate at risk: ${h.reasons.join("; ")}` : "idle capital awaiting allocation"}`,
     });
-    if (h.violated) journal({ user, kind: "observe", title: "⚠ Mandate at risk", detail: h.reasons.join("; ") });
+    if (h.violated) await journal({ user, kind: "observe", title: "⚠ Mandate at risk", detail: h.reasons.join("; ") });
 
     const p = await propose(input);
-    journalProposal(user, p, strategies);
+    await journalProposal(user, p, strategies);
     steps.push({ step: "DECIDE", status: "ok", detail: `${p.engine}: ${p.rationale}` });
     if (!p.validation.ok) {
       steps.push({ step: "CONSTRAIN", status: "error", detail: `${p.validation.error}: ${p.validation.detail}` });
@@ -172,7 +172,7 @@ export async function runKeeper(only?: Address): Promise<LoopStep[]> {
       steps.push({ step: "EXECUTE", status: "ok", detail: "Allocation executed", txHash: hash });
     } catch (err) {
       const reason = decodeRevert(err);
-      journal({ user, kind: "reject", title: `Executor refused allocation: ${reason}` });
+      await journal({ user, kind: "reject", title: `Executor refused allocation: ${reason}` });
       steps.push({ step: "EXECUTE", status: "error", detail: reason });
     }
   }
@@ -209,7 +209,7 @@ export async function guardrailTest(user: Address) {
     gas: 400_000n,
   });
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
-  journal({
+  await journal({
     user,
     kind: "guardrail",
     title: `Guardrail test: unsafe proposal (Strategy B 60%) ${receipt.status === "reverted" ? "REVERTED onchain" : "was not reverted"}`,

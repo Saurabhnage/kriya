@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   try {
     const user = parseUser(new URL(request.url).searchParams.get("user"));
     const snap = await readSnapshot(user);
-    const feed = getRiskFeed();
+    const feed = await getRiskFeed();
     const activity = await readActivity(user, snap.strategies, snap.block);
     // What the mandate looks like against the latest *external* risk view (before CRE writes it onchain)
     const pending = snap.mandate.exists

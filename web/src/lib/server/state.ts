@@ -148,14 +148,13 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
       latest,
     );
 
-  const [dep, wd, ex, ms, risk, exec] = await Promise.all([
-    get(deployment.vault, EVENTS.deposited, { user }),
-    get(deployment.vault, EVENTS.withdrawn, { user }),
-    get(deployment.vault, EVENTS.exit, { user }),
-    get(deployment.mandate, EVENTS.mandateStatus, { user }),
-    get(deployment.registry, EVENTS.risk),
-    get(deployment.executor, EVENTS.executed, { user }),
-  ]);
+  // sequential on purpose: public RPCs rate-limit parallel eth_getLogs bursts
+  const dep = await get(deployment.vault, EVENTS.deposited, { user });
+  const wd = await get(deployment.vault, EVENTS.withdrawn, { user });
+  const ex = await get(deployment.vault, EVENTS.exit, { user });
+  const ms = await get(deployment.mandate, EVENTS.mandateStatus, { user });
+  const risk = await get(deployment.registry, EVENTS.risk);
+  const exec = await get(deployment.executor, EVENTS.executed, { user });
 
   type AnyLog = Log & { args: Record<string, unknown> };
   const items: { log: AnyLog; kind: string; title: string; detail?: string; source?: "CRE" | "AGENT" }[] = [];
@@ -189,9 +188,9 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
   }
 
   const blocks = [...new Set(items.map((i) => i.log.blockNumber!))].filter((b) => !blockTimes.has(b));
-  await Promise.all(
-    blocks.map(async (b) => blockTimes.set(b, Number((await publicClient.getBlock({ blockNumber: b })).timestamp) * 1000)),
-  );
+  for (const b of blocks) {
+    blockTimes.set(b, Number((await publicClient.getBlock({ blockNumber: b })).timestamp) * 1000);
+  }
 
   const onchain: ActivityItem[] = items.map((i) => ({
     id: `${i.log.transactionHash}-${i.log.logIndex}`,
@@ -203,7 +202,7 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
     onchain: true,
     source: i.source,
   }));
-  const offchain: (ActivityItem & { seq: number })[] = readJournal(user).map((j: JournalEntry, seq) => ({
+  const offchain: (ActivityItem & { seq: number })[] = (await readJournal(user)).map((j: JournalEntry, seq) => ({
     seq,
     id: j.id,
     ts: j.ts,

@@ -5,7 +5,12 @@ import { chain, PUBLIC_RPC_URL } from "../config";
 
 const RPC_URL = process.env.RPC_URL ?? PUBLIC_RPC_URL;
 
-export const publicClient = createPublicClient({ chain, transport: http(RPC_URL) });
+// Public RPCs throttle bursts: fold parallel reads into one multicall and retry transient errors.
+export const publicClient = createPublicClient({
+  chain,
+  batch: { multicall: true },
+  transport: http(RPC_URL, { retryCount: 4, retryDelay: 400 }),
+});
 
 function wallet(envName: string) {
   const pk = process.env[envName];
