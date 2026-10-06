@@ -1,6 +1,6 @@
 {
   "schedule": "*/30 * * * * *",
-  "agentUrl": "http://localhost:3000",
+  "agentUrl": "https://kriya-beta.vercel.app",
   "chainName": "ethereum-testnet-sepolia",
   "executorAddress": "0x9c5f1A2326Fa1C16e04Ecf32C60091150161656A",
   "registryAddress": "0xadAE9Abccf4fE599405C39bC19A4686566dEd7b6",

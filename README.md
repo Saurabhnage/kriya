@@ -10,6 +10,8 @@ KRIYA lets a user program a **financial mandate** (objective + hard constraints)
 
 ## Live on Ethereum Sepolia
 
+**App:** https://kriya-beta.vercel.app (any mandate can be viewed read-only: [demo mandate](https://kriya-beta.vercel.app/?view=0x09855cE865D094F6c2F2B5A13F64FC6F82b3B4C7))
+
 | Contract | Address |
 | --- | --- |
 | KriyaExecutor (CRE receiver) | [`0x9c5f1A2326Fa1C16e04Ecf32C60091150161656A`](https://sepolia.etherscan.io/address/0x9c5f1A2326Fa1C16e04Ecf32C60091150161656A) |
