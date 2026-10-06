@@ -13,7 +13,7 @@ export const publicClient = createPublicClient({
 });
 
 function wallet(envName: string) {
-  const pk = process.env[envName];
+  const pk = process.env[envName]?.trim();
   if (!pk) throw new Error(`${envName} is not set`);
   const account = privateKeyToAccount((pk.startsWith("0x") ? pk : `0x${pk}`) as Hex);
   return createWalletClient({ account, chain, transport: http(RPC_URL) });
