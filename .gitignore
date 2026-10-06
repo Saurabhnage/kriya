@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.local
+.env*.local
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/31337/
+.next/
+cre/**/node_modules/
+cre/.env
+*.wasm
+.data/
