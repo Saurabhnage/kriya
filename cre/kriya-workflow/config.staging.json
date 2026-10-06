@@ -1,0 +1,10 @@
+{
+  "schedule": "*/30 * * * * *",
+  "agentUrl": "http://localhost:3000",
+  "chainName": "ethereum-testnet-sepolia",
+  "executorAddress": "0x0000000000000000000000000000000000000000",
+  "registryAddress": "0x0000000000000000000000000000000000000000",
+  "mandateAddress": "0x0000000000000000000000000000000000000000",
+  "vaultAddress": "0x0000000000000000000000000000000000000000",
+  "gasLimit": "1500000"
+}
