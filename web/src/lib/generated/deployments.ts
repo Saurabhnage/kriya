@@ -14,5 +14,19 @@ export const deployments = {
     "strategyC": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
     "usdc": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     "vault": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+  },
+  "11155111": {
+    "agent": "0x519689958b7cd8Ef3b3c9Ff85BE914737e68FC36",
+    "chainId": 11155111,
+    "deployBlock": 11854991,
+    "executor": "0x9c5f1A2326Fa1C16e04Ecf32C60091150161656A",
+    "forwarder": "0x15fC6ae953E024d975e77382eEeC56A9101f9F88",
+    "mandate": "0x97FD1b5af7622377744C8c2F44F4fF3A04a52073",
+    "registry": "0xadAE9Abccf4fE599405C39bC19A4686566dEd7b6",
+    "strategyA": "0xE92168d45CAf4ec291ce78E727e90015D50e2032",
+    "strategyB": "0xe62bE538B87fb492FCf977b1Ddf7ee7202148006",
+    "strategyC": "0x5d59Be06B7518EF3438194226826487d35a5f6fd",
+    "usdc": "0x17Be8BA91d0f331B198eFe73Dd272f9C492d471D",
+    "vault": "0xd167B393646E39A01bB14A4e0C53A96940C249ee"
   }
 } as const;

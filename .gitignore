@@ -11,3 +11,4 @@ cre/.env
 *.wasm
 .data/
 .cre_build_tmp.js
+contracts/.env

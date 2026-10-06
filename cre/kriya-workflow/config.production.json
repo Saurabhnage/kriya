@@ -2,9 +2,9 @@
   "schedule": "*/30 * * * * *",
   "agentUrl": "http://localhost:3000",
   "chainName": "ethereum-testnet-sepolia",
-  "executorAddress": "0x0000000000000000000000000000000000000000",
-  "registryAddress": "0x0000000000000000000000000000000000000000",
-  "mandateAddress": "0x0000000000000000000000000000000000000000",
-  "vaultAddress": "0x0000000000000000000000000000000000000000",
+  "executorAddress": "0x9c5f1A2326Fa1C16e04Ecf32C60091150161656A",
+  "registryAddress": "0xadAE9Abccf4fE599405C39bC19A4686566dEd7b6",
+  "mandateAddress": "0x97FD1b5af7622377744C8c2F44F4fF3A04a52073",
+  "vaultAddress": "0xd167B393646E39A01bB14A4e0C53A96940C249ee",
   "gasLimit": "1500000"
 }

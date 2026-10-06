@@ -8,6 +8,28 @@ KRIYA lets a user program a **financial mandate** (objective + hard constraints)
 
 ---
 
+## Live on Ethereum Sepolia
+
+| Contract | Address |
+| --- | --- |
+| KriyaExecutor (CRE receiver) | [`0x9c5f1A2326Fa1C16e04Ecf32C60091150161656A`](https://sepolia.etherscan.io/address/0x9c5f1A2326Fa1C16e04Ecf32C60091150161656A) |
+| KriyaVault | [`0xd167B393646E39A01bB14A4e0C53A96940C249ee`](https://sepolia.etherscan.io/address/0xd167B393646E39A01bB14A4e0C53A96940C249ee) |
+| KriyaMandate | [`0x97FD1b5af7622377744C8c2F44F4fF3A04a52073`](https://sepolia.etherscan.io/address/0x97FD1b5af7622377744C8c2F44F4fF3A04a52073) |
+| KriyaStrategyRegistry | [`0xadAE9Abccf4fE599405C39bC19A4686566dEd7b6`](https://sepolia.etherscan.io/address/0xadAE9Abccf4fE599405C39bC19A4686566dEd7b6) |
+| Test USDC | [`0x17Be8BA91d0f331B198eFe73Dd272f9C492d471D`](https://sepolia.etherscan.io/address/0x17Be8BA91d0f331B198eFe73Dd272f9C492d471D) |
+| Strategy A / B / C | [`0xE92168d45CAf4ec291ce78E727e90015D50e2032`](https://sepolia.etherscan.io/address/0xE92168d45CAf4ec291ce78E727e90015D50e2032) / [`0xe62bE538B87fb492FCf977b1Ddf7ee7202148006`](https://sepolia.etherscan.io/address/0xe62bE538B87fb492FCf977b1Ddf7ee7202148006) / [`0x5d59Be06B7518EF3438194226826487d35a5f6fd`](https://sepolia.etherscan.io/address/0x5d59Be06B7518EF3438194226826487d35a5f6fd) |
+| Chainlink forwarder (simulation) | [`0x15fC6ae953E024d975e77382eEeC56A9101f9F88`](https://sepolia.etherscan.io/address/0x15fC6ae953E024d975e77382eEeC56A9101f9F88) |
+
+End-to-end loop executed on Sepolia:
+
+| Step | Tx |
+| --- | --- |
+| Open $1,000 mandate | [`0x7b0fd91d…`](https://sepolia.etherscan.io/tx/0x7b0fd91db394dd1156e0c37d1383eb5752e39e444f4458a822a6e9e4601b554f) |
+| Initial allocation (B 40 · A 35 · Reserve 25) | [`0x6a779a47…`](https://sepolia.etherscan.io/tx/0x6a779a47e15b4ce9b1340f3e5d56dc878c128257c3dcb39cdf8b760661f9cd25) |
+| Guardrail: unsafe 60% proposal **reverted** (`ExposureExceeded`) | [`0x6eee86fd…`](https://sepolia.etherscan.io/tx/0x6eee86fd1dd39e1c9f939d4e04c92bc1d477eecec828c89553fcfe4eba3077b9) |
+| Verified risk change: Strategy B 34 → 48 | [`0x8b7f4aa0…`](https://sepolia.etherscan.io/tx/0x8b7f4aa068c2856977b37168864e2b701ebf5771c9af05c5cf69201ab123dfa4) |
+| Autonomous rebalance (A 40 · C 35 · Reserve 25) | [`0x96727352…`](https://sepolia.etherscan.io/tx/0x967273526aeabd1a3a7663ac70cf32c7060110ebc9150529f7b165dd63619d04) |
+
 ## The loop
 
 ```
