@@ -10,3 +10,4 @@ cre/**/node_modules/
 cre/.env
 *.wasm
 .data/
+.cre_build_tmp.js
