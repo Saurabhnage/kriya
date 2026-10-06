@@ -32,6 +32,8 @@ End-to-end loop executed on Sepolia:
 | Verified risk change: Strategy B 34 → 48 | [`0x8b7f4aa0…`](https://sepolia.etherscan.io/tx/0x8b7f4aa068c2856977b37168864e2b701ebf5771c9af05c5cf69201ab123dfa4) |
 | Autonomous rebalance (A 40 · C 35 · Reserve 25) | [`0x96727352…`](https://sepolia.etherscan.io/tx/0x967273526aeabd1a3a7663ac70cf32c7060110ebc9150529f7b165dd63619d04) |
 
+> **Decision engine:** the live deployment runs the transparent deterministic optimizer (`KRIYA_LLM=off`). Set `ANTHROPIC_API_KEY` and unset `KRIYA_LLM` to have Claude propose allocations; Claude's output passes through the same three validation layers.
+
 ## The loop
 
 ```
@@ -163,7 +165,7 @@ The **Run autonomous loop** button in the dashboard runs the identical loop from
 ## 3-minute demo script
 
 1. **Objective (0:00):** connect wallet → *Program mandate* ($1,000, max risk 40, exposure 40%, reserve 25%). One wallet flow: faucet → approve → `openMandate`.
-2. **KRIYA decides (0:20):** *Preview AI decision* shows Claude's allocation, rationale and per-strategy analysis. Then run the CRE workflow (or *Run autonomous loop*) to execute **B 40 · A 35 · Reserve 25** onchain.
+2. **KRIYA decides (0:20):** *Preview decision* shows the proposed allocation, rationale and per-strategy assessment. Then run the CRE workflow (or *Run autonomous loop*) to execute **B 40 · A 35 · Reserve 25** onchain.
 3. **Constraint layer (1:00):** *Guardrail test* submits an unsafe 60% allocation from the agent key. The tx **reverts onchain** with `ExposureExceeded`, and the explorer link proves it.
 4. **Change reality (1:30):** *Spike Strategy B risk → 48*. The dashboard flags **⚠ MANDATE AT RISK** (external signal, unverified).
 5. **Autonomous rebalance (2:00):** run CRE again. Logs show VERIFY (risk report onchain) → DETECT → DECIDE (Claude) → CONSTRAIN → EXECUTE.

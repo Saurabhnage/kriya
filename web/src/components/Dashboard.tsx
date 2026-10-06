@@ -203,7 +203,7 @@ function AgentPanel({ user, hasCapital, refresh, state }: { user: Address; hasCa
           disabled={!!busy || !hasCapital}
           onClick={() => run("Thinking…", async () => setProposal(await api<ProposalResponse>("/api/agent/propose", { user })))}
         >
-          {busy === "Thinking…" ? busy : "Preview AI decision"}
+          {busy === "Thinking…" ? busy : "Preview decision"}
         </button>
         <button
           className="btn btn-primary"
