@@ -120,7 +120,8 @@ function describe(input: DecisionInput, trigger: string) {
 let client: Anthropic | null = null;
 
 async function askClaude(input: DecisionInput, trigger: string) {
-  client ??= new Anthropic();
+  const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
+  client ??= new Anthropic(apiKey ? { apiKey } : {});
   const response = await client.beta.messages.create({
     model: MODEL,
     max_tokens: 16000,
