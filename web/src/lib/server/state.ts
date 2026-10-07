@@ -187,6 +187,7 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
       point: {
         portfolioRisk: null,
         kind: "risk-change",
+        up: (l.args.newRisk as number) > (l.args.oldRisk as number),
         label: `${name(l.args.strategy as string).split(" - ")[0]} ${l.args.oldRisk} → ${l.args.newRisk}`,
         source: (l.args.updater as string).toLowerCase() === deployment.executor.toLowerCase() ? "CRE" : "AGENT",
       },

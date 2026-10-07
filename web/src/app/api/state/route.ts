@@ -4,7 +4,7 @@ import { evaluateHealth } from "@/lib/policy";
 import { withRisks } from "@/lib/server/loop";
 import { buildLastRun } from "@/lib/server/lastRun";
 import type { Proposal } from "@/lib/server/agent";
-import { deriveAct } from "@/lib/act";
+import { deriveAct, lastBreachAt } from "@/lib/act";
 import { fail, json, parseUser } from "@/lib/server/http";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +40,6 @@ export async function GET(request: Request) {
       : null;
 
     const executions = riskHistory.filter((p) => p.kind === "execution");
-    const riskChanges = riskHistory.filter((p) => p.kind === "risk-change");
     const firstExecutionTs = executions[0]?.ts ?? null;
     const act = deriveAct({
       mandateExists: snap.mandate.exists,
@@ -50,7 +49,7 @@ export async function GET(request: Request) {
       guardrailShown: firstExecutionTs !== null && journal.some((j) => j.kind === "guardrail" && j.ts >= firstExecutionTs),
       feedMatchesOnchain: snap.strategies.every((s) => (feed.risks[s.address.toLowerCase()] ?? s.risk) === s.risk),
       lastExecutionAt: executions.at(-1)?.order ?? null,
-      lastRiskChangeAt: riskChanges.at(-1)?.order ?? null,
+      lastRiskChangeAt: lastBreachAt(riskHistory),
     });
 
     const latestDecision = toDecision([...journal].reverse().find((j) => j.kind === "decide" && j.data));

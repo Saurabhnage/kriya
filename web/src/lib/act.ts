@@ -39,3 +39,12 @@ export function deriveAct(i: ActInput): Act {
   }
   return 4;
 }
+
+/**
+ * Chain order of the latest verified risk change if it *raised* risk (the breach the story
+ * rebalances away from). A later decrease — e.g. resetting the feed — restarts the story, so null.
+ */
+export function lastBreachAt(history: { kind: "execution" | "risk-change"; order: number; up?: boolean }[]): number | null {
+  const last = history.filter((p) => p.kind === "risk-change").at(-1);
+  return last?.up ? last.order : null;
+}

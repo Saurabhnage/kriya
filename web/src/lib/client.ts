@@ -66,6 +66,7 @@ export type RiskPoint = {
   order: number;
   portfolioRisk: number | null;
   kind: "execution" | "risk-change";
+  up?: boolean;
   label: string;
   txHash?: string;
   source?: "AGENT" | "CRE";

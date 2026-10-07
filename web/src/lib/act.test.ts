@@ -24,3 +24,23 @@ test("done when an execution follows the latest risk change and all is safe", ()
   assert.equal(deriveAct({ ...base, lastRiskChangeAt: 200, lastExecutionAt: 300 }), "done"));
 test("back to 4 when risk changed after the last execution but stayed safe", () =>
   assert.equal(deriveAct({ ...base, lastRiskChangeAt: 400, lastExecutionAt: 300 }), 4));
+
+import { lastBreachAt } from "./act";
+
+test("lastBreachAt is the latest risk change when it was an increase", () => {
+  const h = [
+    { kind: "execution" as const, order: 1 },
+    { kind: "risk-change" as const, order: 2, up: true },
+  ];
+  assert.equal(lastBreachAt(h), 2);
+});
+test("lastBreachAt is null once a later risk change lowered risk (feed reset restarts the story)", () => {
+  const h = [
+    { kind: "risk-change" as const, order: 2, up: true },
+    { kind: "execution" as const, order: 3 },
+    { kind: "risk-change" as const, order: 4, up: false },
+    { kind: "execution" as const, order: 5 },
+  ];
+  assert.equal(lastBreachAt(h), null);
+});
+test("lastBreachAt is null with no risk changes", () => assert.equal(lastBreachAt([{ kind: "execution" as const, order: 1 }]), null));
