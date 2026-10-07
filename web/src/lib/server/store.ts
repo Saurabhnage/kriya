@@ -96,7 +96,9 @@ export type JournalEntry = {
   id: string;
   ts: number;
   user?: string;
-  kind: "observe" | "decide" | "verify" | "constrain" | "execute" | "reject" | "reality" | "guardrail";
+  kind: "observe" | "decide" | "verify" | "constrain" | "execute" | "reject" | "reality" | "guardrail" | "run";
+  runId?: string;
+  source?: "AGENT" | "CRE";
   title: string;
   detail?: string;
   txHash?: string;

@@ -11,6 +11,7 @@ import {
 } from "../generated/abis";
 import type { MandateParams, StrategyView } from "../policy";
 import { readJournal, type JournalEntry } from "./store";
+import type { RiskPoint } from "./lastRun";
 
 export type Snapshot = {
   user: Address;
@@ -103,6 +104,7 @@ export async function listMandateUsers(): Promise<Address[]> {
 // ------------------------------------------------------------------ activity (onchain events + agent journal)
 
 export type ActivityItem = {
+  runId?: string;
   id: string;
   ts: number;
   kind: string;
@@ -139,7 +141,9 @@ async function logsInChunks<T>(fetcher: (from: bigint, to: bigint) => Promise<T[
 
 const fmtUsdc = (v: bigint) => (Number(v) / 1e6).toLocaleString("en-US", { maximumFractionDigits: 2 });
 
-export async function readActivity(user: Address, strategies: StrategyView[], latest: bigint): Promise<ActivityItem[]> {
+export type ActivityResult = { items: ActivityItem[]; riskHistory: RiskPoint[]; journal: JournalEntry[] };
+
+export async function readActivity(user: Address, strategies: StrategyView[], latest: bigint): Promise<ActivityResult> {
   const name = (a: string) => strategies.find((s) => s.address.toLowerCase() === a.toLowerCase())?.name ?? a.slice(0, 8);
   const get = (address: Address, event: (typeof EVENTS)[keyof typeof EVENTS], args?: Record<string, unknown>) =>
     logsInChunks(
@@ -157,7 +161,14 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
   const exec = await get(deployment.executor, EVENTS.executed, { user });
 
   type AnyLog = Log & { args: Record<string, unknown> };
-  const items: { log: AnyLog; kind: string; title: string; detail?: string; source?: "CRE" | "AGENT" }[] = [];
+  const items: {
+    log: AnyLog;
+    kind: string;
+    title: string;
+    detail?: string;
+    source?: "CRE" | "AGENT";
+    point?: Omit<RiskPoint, "ts" | "txHash">;
+  }[] = [];
   for (const l of dep as AnyLog[]) items.push({ log: l, kind: "deposit", title: `Deposited ${fmtUsdc(l.args.amount as bigint)} USDC` });
   for (const l of wd as AnyLog[]) items.push({ log: l, kind: "withdraw", title: `Withdrew ${fmtUsdc(l.args.amount as bigint)} USDC` });
   for (const l of ex as AnyLog[])
@@ -172,6 +183,12 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
       title: `Verified risk ${up ? "increase" : "change"}: ${name(l.args.strategy as string)} ${l.args.oldRisk} → ${l.args.newRisk}`,
       detail: (l.args.updater as string).toLowerCase() === deployment.executor.toLowerCase() ? "Written by Chainlink CRE report" : "Written by protocol keeper",
       source: (l.args.updater as string).toLowerCase() === deployment.executor.toLowerCase() ? "CRE" : "AGENT",
+      point: {
+        portfolioRisk: null,
+        kind: "risk-change",
+        label: `${name(l.args.strategy as string).split(" - ")[0]} ${l.args.oldRisk} → ${l.args.newRisk}`,
+        source: (l.args.updater as string).toLowerCase() === deployment.executor.toLowerCase() ? "CRE" : "AGENT",
+      },
     });
   }
   for (const l of exec as AnyLog[]) {
@@ -184,6 +201,7 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
       title: `Allocation #${a.executionId} executed via ${a.source === 1 ? "Chainlink CRE" : "KRIYA agent"} · risk ${a.portfolioRisk}`,
       detail: `${parts.join(" · ")}${a.rationale ? ` — ${a.rationale}` : ""}`,
       source: a.source === 1 ? "CRE" : "AGENT",
+      point: { portfolioRisk: a.portfolioRisk, kind: "execution", label: `Allocation #${a.executionId}`, source: a.source === 1 ? "CRE" : "AGENT" },
     });
   }
 
@@ -202,8 +220,16 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
     onchain: true,
     source: i.source,
   }));
-  const offchain: (ActivityItem & { seq: number })[] = (await readJournal(user)).map((j: JournalEntry, seq) => ({
+  const riskHistory: RiskPoint[] = items
+    .filter((i) => i.point)
+    .map((i) => ({ ...i.point!, ts: blockTimes.get(i.log.blockNumber!) ?? 0, txHash: i.log.transactionHash ?? undefined }))
+    .sort((a, b) => a.ts - b.ts);
+  const journal = await readJournal(user);
+  const offchain: (ActivityItem & { seq: number })[] = journal
+    .filter((j) => j.kind !== "run")
+    .map((j: JournalEntry, seq) => ({
     seq,
+    runId: j.runId,
     id: j.id,
     ts: j.ts,
     kind: j.kind,
@@ -213,7 +239,8 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
     onchain: false,
   }));
   // newest first; journal entries written in the same millisecond keep their write order
-  return [...onchain.map((o) => ({ ...o, seq: -1 })), ...offchain]
+  const sorted = [...onchain.map((o) => ({ ...o, seq: -1 })), ...offchain]
     .sort((a, b) => b.ts - a.ts || b.seq - a.seq)
     .map((item) => ({ ...item, seq: undefined }));
+  return { items: sorted, riskHistory, journal };
 }

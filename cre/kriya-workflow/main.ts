@@ -182,7 +182,7 @@ const onCron = (runtime: Runtime<Config>): string => {
     // DECIDE — the agent proposes using the CRE-verified risk view
     const risks = Object.fromEntries(verified.map((v) => [v.address.toLowerCase(), v.risk]))
     const proposalJson = http
-      .sendRequest(runtime, requestProposal, consensusIdenticalAggregation<string>())(cfg, JSON.stringify({ user, risks }))
+      .sendRequest(runtime, requestProposal, consensusIdenticalAggregation<string>())(cfg, JSON.stringify({ user, risks, source: "cre" }))
       .result()
     const p = JSON.parse(proposalJson) as { strategies: string[]; bps: number[]; rationale: string; engine: string; model: string | null }
     runtime.log(`[DECIDE] ${p.engine}${p.model ? ` (${p.model})` : ""}: ${p.strategies.map((s, i) => `${s.slice(0, 8)}=${p.bps[i]}`).join(", ")} — ${p.rationale}`)

@@ -7,6 +7,7 @@ import { evaluateHealth, type StrategyView } from "../policy";
 import { propose, type DecisionInput, type Proposal } from "./agent";
 import { listMandateUsers, readSnapshot, readStrategies } from "./state";
 import { getRiskFeed, journal } from "./store";
+import type { LoopStep } from "../client";
 
 const name = (strategies: StrategyView[], a: string) =>
   strategies.find((s) => s.address.toLowerCase() === a.toLowerCase())?.name.split(" - ")[0] ?? a.slice(0, 8);
@@ -71,13 +72,16 @@ export async function executeViaAgent(user: Address, proposal: Proposal): Promis
   return hash;
 }
 
-export async function journalProposal(user: Address, p: Proposal, strategies: StrategyView[]) {
+export type RunContext = { runId?: string; source?: "AGENT" | "CRE" };
+
+export async function journalProposal(user: Address, p: Proposal, strategies: StrategyView[], ctx: RunContext = {}) {
   const mix = [...p.allocation.map((a) => `${name(strategies, a.strategy)} ${a.bps / 100}%`)];
   if (p.validation.ok) mix.push(`Reserve ${p.validation.reserveBps / 100}%`);
   if (p.llmRejected?.error === "LLMUnavailable") {
-    await journal({ user, kind: "reject", title: "LLM unavailable: deterministic optimizer used", detail: p.llmRejected.detail });
+    await journal({ ...ctx, user, kind: "reject", title: "LLM unavailable: deterministic optimizer used", detail: p.llmRejected.detail });
   } else if (p.llmRejected) {
     await journal({
+      ...ctx,
       user,
       kind: "reject",
       title: `LLM proposal rejected by policy engine: ${p.llmRejected.error}`,
@@ -85,6 +89,7 @@ export async function journalProposal(user: Address, p: Proposal, strategies: St
     });
   }
   await journal({
+    ...ctx,
     user,
     kind: "decide",
     title: `${p.engine === "llm" ? `AI decision (${p.model})` : "Deterministic decision"}: ${mix.join(" · ")}`,
@@ -93,6 +98,7 @@ export async function journalProposal(user: Address, p: Proposal, strategies: St
   });
   if (p.validation.ok) {
     await journal({
+      ...ctx,
       user,
       kind: "constrain",
       title: `Mandate check passed: portfolio risk ${p.validation.portfolioRisk}, expected APY ${(p.validation.expectedApyBps / 100).toFixed(2)}%`,
@@ -100,17 +106,23 @@ export async function journalProposal(user: Address, p: Proposal, strategies: St
   }
 }
 
-export type LoopStep = { step: string; status: "ok" | "skip" | "warn" | "error"; detail: string; txHash?: string };
+export type { LoopStep } from "../client";
 
 /**
  * Local keeper: the same Observe → Verify → Decide → Constrain → Execute loop as the Chainlink CRE
  * workflow, run from this server with the protocol keys. Used when CRE is not available.
  */
-export async function runKeeper(only?: Address): Promise<LoopStep[]> {
+export async function runKeeper(only?: Address, onStep?: (step: LoopStep) => void): Promise<LoopStep[]> {
+  const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  const ctx: RunContext = { runId, source: "AGENT" };
   const steps: LoopStep[] = [];
+  const push = (step: LoopStep) => {
+    steps.push(step);
+    onStep?.(step);
+  };
   const feed = await getRiskFeed();
   const onchain = await readStrategies();
-  steps.push({
+  push({
     step: "OBSERVE",
     status: "ok",
     detail: onchain.map((s) => `${name(onchain, s.address)} onchain ${s.risk} / feed ${feed.risks[s.address.toLowerCase()] ?? s.risk}`).join(", "),
@@ -131,10 +143,10 @@ export async function runKeeper(only?: Address): Promise<LoopStep[]> {
     });
     await publicClient.waitForTransactionReceipt({ hash });
     const detail = changed.map((s) => `${name(onchain, s.address)} ${s.risk} → ${feed.risks[s.address.toLowerCase()]}`).join(", ");
-    steps.push({ step: "VERIFY", status: "ok", detail: `Risk scores updated onchain: ${detail}`, txHash: hash });
-    await journal({ kind: "verify", title: `Keeper verified risk change: ${detail}`, txHash: hash });
+    push({ step: "VERIFY", status: "ok", detail: `Risk scores updated onchain: ${detail}`, txHash: hash });
+    await journal({ ...ctx, kind: "verify", title: `Keeper verified risk change: ${detail}`, txHash: hash });
   } else {
-    steps.push({ step: "VERIFY", status: "skip", detail: "Onchain risk scores match the feed" });
+    push({ step: "VERIFY", status: "skip", detail: "Onchain risk scores match the feed" });
   }
 
   const strategies = withRisks(onchain, feed.risks);
@@ -144,38 +156,39 @@ export async function runKeeper(only?: Address): Promise<LoopStep[]> {
     if (!input) continue;
     const snap = await readSnapshot(user);
     if (!snap.mandate.active) {
-      steps.push({ step: "CHECK", status: "skip", detail: `${user.slice(0, 8)}: mandate paused` });
+      push({ step: "DETECT", status: "skip", detail: `${user.slice(0, 8)}: mandate paused` });
       continue;
     }
     const h = evaluateHealth(input.params, input.allowed, strategies, input.positions, input.idle);
     if (h.totalValue === 0n || (h.allocated && !h.violated)) {
-      steps.push({ step: "CHECK", status: "ok", detail: `${user.slice(0, 8)}: mandate safe (risk ${h.portfolioRisk}/${input.params.maxRisk})` });
+      push({ step: "DETECT", status: "ok", detail: `${user.slice(0, 8)}: mandate safe (risk ${h.portfolioRisk}/${input.params.maxRisk})` });
       continue;
     }
-    steps.push({
+    push({
       step: "DETECT",
       status: "warn",
       detail: `${user.slice(0, 8)}: ${h.allocated ? `mandate at risk: ${h.reasons.join("; ")}` : "idle capital awaiting allocation"}`,
     });
-    if (h.violated) await journal({ user, kind: "observe", title: "⚠ Mandate at risk", detail: h.reasons.join("; ") });
+    if (h.violated) await journal({ ...ctx, user, kind: "observe", title: "⚠ Mandate at risk", detail: h.reasons.join("; ") });
 
     const p = await propose(input);
-    await journalProposal(user, p, strategies);
-    steps.push({ step: "DECIDE", status: "ok", detail: `${p.engine}: ${p.rationale}` });
+    await journalProposal(user, p, strategies, ctx);
+    push({ step: "DECIDE", status: "ok", detail: `${p.engine}: ${p.rationale}` });
     if (!p.validation.ok) {
-      steps.push({ step: "CONSTRAIN", status: "error", detail: `${p.validation.error}: ${p.validation.detail}` });
+      push({ step: "CONSTRAIN", status: "error", detail: `${p.validation.error}: ${p.validation.detail}` });
       continue;
     }
-    steps.push({ step: "CONSTRAIN", status: "ok", detail: `Portfolio risk ${p.validation.portfolioRisk} within ${input.params.maxRisk}` });
+    push({ step: "CONSTRAIN", status: "ok", detail: `Portfolio risk ${p.validation.portfolioRisk} within ${input.params.maxRisk}` });
     try {
       const hash = await executeViaAgent(user, p);
-      steps.push({ step: "EXECUTE", status: "ok", detail: "Allocation executed", txHash: hash });
+      push({ step: "EXECUTE", status: "ok", detail: "Allocation executed", txHash: hash });
     } catch (err) {
       const reason = decodeRevert(err);
-      await journal({ user, kind: "reject", title: `Executor refused allocation: ${reason}` });
-      steps.push({ step: "EXECUTE", status: "error", detail: reason });
+      await journal({ ...ctx, user, kind: "reject", title: `Executor refused allocation: ${reason}` });
+      push({ step: "EXECUTE", status: "error", detail: reason });
     }
   }
+  await journal({ ...ctx, user: only, kind: "run", title: "Keeper loop run", data: { steps } });
   return steps;
 }
 

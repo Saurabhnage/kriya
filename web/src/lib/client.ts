@@ -1,3 +1,6 @@
+import type { Act } from "./act";
+export type { Act } from "./act";
+
 // Client-side shapes of /api responses (bigints arrive as decimal strings).
 
 export type StrategyView = { address: string; name: string; apyBps: number; risk: number };
@@ -50,8 +53,26 @@ export type StateResponse = {
     txHash?: string;
     onchain: boolean;
     source?: "CRE" | "AGENT";
+    runId?: string;
   }[];
+  riskHistory: RiskPoint[];
+  lastRun: RunView | null;
+  latestDecision: Decision | null;
+  act: Act;
 };
+
+export type RiskPoint = {
+  ts: number;
+  portfolioRisk: number | null;
+  kind: "execution" | "risk-change";
+  label: string;
+  txHash?: string;
+  source?: "AGENT" | "CRE";
+};
+
+export type RunView = { runId: string; source: "AGENT" | "CRE"; ts: number; steps: LoopStep[] };
+
+export type Decision = Omit<ProposalResponse, "user"> & { ts: number; source: "AGENT" | "CRE" };
 
 export type ProposalResponse = {
   user: string;
