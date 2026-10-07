@@ -325,10 +325,10 @@ const S3 = "The working loop, live on Ethereum Sepolia";
   eyebrow(s, "What we built", C.accent1);
   s.addText("One vertical slice, end to end", { placeholder: "title" });
   const cards = [
-    ["01", THEME.colors.accent1, "Contracts", "Vault, Mandate, Executor, Strategy Registry. Foundry, 17 passing tests."],
+    ["01", THEME.colors.accent1, "Contracts", "Vault, Mandate, Executor, Registry. 23 Foundry tests, incl. 1,000-run fuzz."],
     ["02", THEME.colors.accent2, "Chainlink CRE", "TypeScript workflow → WASM. HTTP consensus, EVM reads, signed reports."],
     ["03", THEME.colors.accent3, "Decision engine", "Claude Sonnet 5.5, schema-bound output, validated three times."],
-    ["04", THEME.colors.accent4, "Live app", "Next.js on Vercel, wallet flows, risk feed, decision journal."],
+    ["04", THEME.colors.accent4, "Live app", "Next.js on Vercel. 12 unit + 15 end-to-end tests, all in CI."],
   ];
   const w = (1664 - 96) / 4;
   cards.forEach(([n, color, title, body], i) => {
@@ -339,7 +339,7 @@ const S3 = "The working loop, live on Ethereum Sepolia";
     text(s, title, { x: x + 40, y: 490, w: w - 80, h: 56, size: 36, bold: true, color: N.inkDark });
     text(s, body, { x: x + 40, y: 566, w: w - 80, h: 220, size: 26, color: N.mutedDark, lh: 1.3 });
   });
-  s.addNotes("We built one polished vertical slice rather than five disconnected integrations: contracts with tests, the Chainlink CRE workflow, a Claude decision engine whose output is always validated, and a live app on Vercel against Sepolia.");
+  s.addNotes("We built one polished vertical slice rather than five disconnected integrations: contracts with 23 tests including fuzzing, the Chainlink CRE workflow, a Claude decision engine whose output is always validated, and a live app on Vercel against Sepolia.");
 }
 
 // ------------------------------------------------------------------ 12 different
@@ -387,7 +387,7 @@ const S4 = "Why it matters and where it goes";
   text(s, "github.com/Saurabhnage", { x: 192, y: 630, w: 520, h: 40, size: 26, font: MONO, color: N.mutedDark, name: "GitHub" });
   eyebrow(s, "Team", C.accent5, 220, 844, 948);
   text(s, "One builder, every layer", { x: 844, y: 270, w: 948, h: 90, size: 72, bold: true, color: C.text2, name: "Title" });
-  const rows = [["Smart contracts", "Vault, Mandate, Executor, Registry · 17 tests"], ["Chainlink CRE", "TypeScript workflow compiled to WASM"], ["Decision engine", "Claude, checked by one shared policy"], ["Product", "Dashboard, wallet flows, Sepolia deploy"]];
+  const rows = [["Smart contracts", "4 contracts · 23 tests incl. fuzzing"], ["Chainlink CRE", "TypeScript workflow compiled to WASM"], ["Decision engine", "Claude, checked by one shared policy"], ["Product", "Live app · 15 end-to-end checks in CI"]];
   s.addTable(rows.map(([a, b], i) => {
     const fill = { color: i % 2 ? N.row : N.light };
     return [{ text: a, options: { bold: true, color: THEME.colors.dk2, fill } }, { text: b, options: { color: N.mutedLight, fill } }];
