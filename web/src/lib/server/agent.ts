@@ -88,7 +88,7 @@ Hard rules your proposal must satisfy (otherwise it is discarded):
 - bps are integers; total allocated bps <= 10000 - minReserveBps.
 
 Objective: pursue the mandate's objective (typically the best risk-adjusted yield) within those rules. Prefer stability: avoid needless churn when the current allocation is still compliant, and when a strategy breaches the mandate, move its capital to the best compliant alternative.
-Write the rationale for an end user: concrete numbers, no hype.`;
+Write the rationale for an end user: concrete numbers, no hype. Never compute portfolio risk or blended APY yourself: quote currentPortfolio's figures, or none — the policy engine reports exact numbers for your proposal.`;
 
 const fmt = (v: bigint) => (Number(v) / 1e6).toFixed(2);
 
@@ -99,6 +99,12 @@ function describe(input: DecisionInput, trigger: string) {
       trigger,
       mandate: { ...input.params, allowedStrategies: input.allowed },
       capitalUsdc: fmt(total),
+      // exact figures from the policy engine, so the rationale never relies on model arithmetic
+      currentPortfolio: (() => {
+        const h = evaluateHealth(input.params, input.allowed, input.strategies, input.positions, input.idle);
+        const apy = total ? input.positions.reduce((a, p) => a + Number(p.amount) * (input.strategies.find((x) => x.address.toLowerCase() === p.strategy.toLowerCase())?.apyBps ?? 0), 0) / Number(total) / 100 : 0;
+        return { portfolioRisk: h.portfolioRisk, expectedApyPct: Number(apy.toFixed(2)), compliant: !h.violated, issues: h.reasons };
+      })(),
       currentPositions: [
         ...input.positions
           .filter((p) => p.amount > 0n)
