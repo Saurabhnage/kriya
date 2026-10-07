@@ -5,6 +5,7 @@ import { WagmiProvider, createConfig, http } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { useState, type ReactNode } from "react";
 import { chain, PUBLIC_RPC_URL } from "@/lib/config";
+import { ToastProvider } from "@/components/Toasts";
 
 const wagmiConfig = createConfig({
   chains: [chain],
@@ -17,7 +18,9 @@ export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   return (
     <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>{children}</ToastProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }
