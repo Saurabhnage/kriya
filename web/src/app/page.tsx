@@ -71,9 +71,9 @@ export default function Home() {
         {isConnected && !wrongChain && !state.data && !state.error && <p className="text-muted">Reading chain state…</p>}
         {isConnected && !wrongChain && state.data && address && (
           state.data.snapshot.mandate.exists ? (
-            <Dashboard state={state.data} user={address} refresh={() => state.refetch()} />
+            <Dashboard state={state.data} user={address} readOnly={!account.isConnected} refresh={() => state.refetch()} />
           ) : (
-            <MandateBuilder state={state.data} user={address} onDone={() => state.refetch()} />
+            <MandateBuilder state={state.data} user={address} readOnly={!account.isConnected} onDone={() => state.refetch()} />
           )
         )}
       </div>

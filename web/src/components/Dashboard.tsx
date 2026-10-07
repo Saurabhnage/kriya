@@ -10,9 +10,9 @@ import { useTx } from "./useTx";
 const COLORS = ["#7cf7c4", "#5aa8ff", "#c38bff", "#ffb547", "#ff7aa8"];
 const RESERVE_COLOR = "#3a4658";
 
-type Props = { state: StateResponse; user: Address; refresh: () => void };
+type Props = { state: StateResponse; user: Address; readOnly?: boolean; refresh: () => void };
 
-export function Dashboard({ state, user, refresh }: Props) {
+export function Dashboard({ state, user, readOnly, refresh }: Props) {
   const { snapshot: s, feed, pending, activity } = state;
   const p = s.mandate.params;
   const total = BigInt(s.total);
@@ -132,7 +132,7 @@ export function Dashboard({ state, user, refresh }: Props) {
         <Activity items={activity} />
       </section>
 
-      <Override user={user} state={state} refresh={refresh} />
+      <Override user={user} state={state} readOnly={readOnly} refresh={refresh} />
     </div>
   );
 }
@@ -409,7 +409,7 @@ function Activity({ items }: { items: StateResponse["activity"] }) {
   );
 }
 
-function Override({ user, state, refresh }: { user: Address; state: StateResponse; refresh: () => void }) {
+function Override({ user, state, readOnly, refresh }: { user: Address; state: StateResponse; readOnly?: boolean; refresh: () => void }) {
   const { send, busy, error } = useTx();
   const s = state.snapshot;
   const act = (label: string, req: Parameters<typeof send>[1]) => send(label, req).catch(() => {}).finally(refresh);
@@ -418,24 +418,24 @@ function Override({ user, state, refresh }: { user: Address; state: StateRespons
       <div>
         <p className="label">Human override</p>
         <p className="text-sm text-muted">
-          You keep final authority. The agent can never withdraw: funds move only between the vault and allowlisted strategies.
+          {readOnly ? "Read-only view: connect the owner's wallet to use these controls. " : ""}You keep final authority. The agent can never withdraw: funds move only between the vault and allowlisted strategies.
         </p>
         {error && <p className="mt-2 text-sm text-danger">{error}</p>}
       </div>
       <div className="flex flex-wrap gap-2">
         <button
           className="btn"
-          disabled={!!busy}
+          disabled={readOnly || !!busy}
           onClick={() => act("Updating mandate", { address: deployment.mandate, abi: KriyaMandateAbi as Abi, functionName: "setActive", args: [!s.mandate.active] })}
         >
           {s.mandate.active ? "Pause agent" : "Resume agent"}
         </button>
-        <button className="btn btn-warn" disabled={!!busy} onClick={() => act("Exiting", { address: deployment.vault, abi: KriyaVaultAbi as Abi, functionName: "emergencyExit" })}>
+        <button className="btn btn-warn" disabled={readOnly || !!busy} onClick={() => act("Exiting", { address: deployment.vault, abi: KriyaVaultAbi as Abi, functionName: "emergencyExit" })}>
           Emergency exit to reserve
         </button>
         <button
           className="btn btn-danger"
-          disabled={!!busy || BigInt(s.idle) === 0n}
+          disabled={readOnly || !!busy || BigInt(s.idle) === 0n}
           onClick={() => act("Withdrawing", { address: deployment.vault, abi: KriyaVaultAbi as Abi, functionName: "withdraw", args: [BigInt(s.idle)] })}
         >
           Withdraw reserve (${usd(s.idle)})

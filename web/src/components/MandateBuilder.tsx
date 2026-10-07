@@ -7,7 +7,7 @@ import { KriyaVaultAbi, MockUSDCAbi } from "@/lib/generated/abis";
 import { shortName, usd, type StateResponse } from "@/lib/client";
 import { useTx } from "./useTx";
 
-type Props = { state: StateResponse; user: Address; onDone: () => void };
+type Props = { state: StateResponse; user: Address; readOnly?: boolean; onDone: () => void };
 
 type SliderProps = { label: string; value: number; set: (n: number) => void; min: number; max: number; unit?: string; hint: string };
 
@@ -27,7 +27,7 @@ function Slider(p: SliderProps) {
   );
 }
 
-export function MandateBuilder({ state, user, onDone }: Props) {
+export function MandateBuilder({ state, user, readOnly, onDone }: Props) {
   const { strategies } = state.snapshot;
   const [capital, setCapital] = useState(DEMO_MANDATE.capital);
   const [objective, setObjective] = useState(DEMO_MANDATE.objective);
@@ -144,8 +144,8 @@ export function MandateBuilder({ state, user, onDone }: Props) {
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
-        <button className="btn btn-primary" disabled={!!busy || allowed.length === 0 || capital <= 0} onClick={() => program().catch(() => {})}>
-          {busy ?? `Program mandate · ${capital.toLocaleString()} USDC`}
+        <button className="btn btn-primary" disabled={readOnly || !!busy || allowed.length === 0 || capital <= 0} onClick={() => program().catch(() => {})}>
+          {readOnly ? "Connect your wallet to program a mandate" : busy ?? `Program mandate · ${capital.toLocaleString()} USDC`}
         </button>
         <span className="text-xs text-muted">
           One wallet flow: faucet (if needed) → approve → <code>KriyaVault.openMandate</code>. Allowed: {allowed.map((a) => shortName(strategies.find((s) => s.address === a)?.name ?? a)).join(", ")}
