@@ -9,8 +9,8 @@ const base: ActInput = {
   pendingViolated: false,
   guardrailShown: true,
   feedMatchesOnchain: true,
-  lastExecutionTs: 100,
-  lastRiskChangeTs: null,
+  lastExecutionAt: 100,
+  lastRiskChangeAt: null,
 };
 
 test("1 Program when there is no mandate", () => assert.equal(deriveAct({ ...base, mandateExists: false }), 1));
@@ -21,6 +21,6 @@ test("5 Rebalance when the external feed breaches", () =>
   assert.equal(deriveAct({ ...base, pendingViolated: true, feedMatchesOnchain: false }), 5));
 test("5 Rebalance when the onchain view breaches", () => assert.equal(deriveAct({ ...base, violated: true }), 5));
 test("done when an execution follows the latest risk change and all is safe", () =>
-  assert.equal(deriveAct({ ...base, lastRiskChangeTs: 200, lastExecutionTs: 300 }), "done"));
+  assert.equal(deriveAct({ ...base, lastRiskChangeAt: 200, lastExecutionAt: 300 }), "done"));
 test("back to 4 when risk changed after the last execution but stayed safe", () =>
-  assert.equal(deriveAct({ ...base, lastRiskChangeTs: 400, lastExecutionTs: 300 }), 4));
+  assert.equal(deriveAct({ ...base, lastRiskChangeAt: 400, lastExecutionAt: 300 }), 4));

@@ -49,8 +49,8 @@ export async function GET(request: Request) {
       pendingViolated: pending?.violated ?? false,
       guardrailShown: firstExecutionTs !== null && journal.some((j) => j.kind === "guardrail" && j.ts >= firstExecutionTs),
       feedMatchesOnchain: snap.strategies.every((s) => (feed.risks[s.address.toLowerCase()] ?? s.risk) === s.risk),
-      lastExecutionTs: executions.at(-1)?.ts ?? null,
-      lastRiskChangeTs: riskChanges.at(-1)?.ts ?? null,
+      lastExecutionAt: executions.at(-1)?.order ?? null,
+      lastRiskChangeAt: riskChanges.at(-1)?.order ?? null,
     });
 
     const latestDecision = toDecision([...journal].reverse().find((j) => j.kind === "decide" && j.data));

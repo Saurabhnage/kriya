@@ -10,6 +10,8 @@ export type RunView = { runId: string; source: "AGENT" | "CRE"; ts: number; step
 
 export type RiskPoint = {
   ts: number;
+  /** block number × 1e6 + log index: exact chain order, unlike timestamps */
+  order: number;
   portfolioRisk: number | null;
   kind: "execution" | "risk-change";
   label: string;

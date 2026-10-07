@@ -19,8 +19,8 @@ test("CRE run is assembled from its decide entry and onchain events", () => {
   const r = buildLastRun(
     [{ ts: 1000, kind: "decide", runId: "cre-1", source: "CRE", title: "AI decision", detail: "exit B" }],
     [
-      { ts: 990, portfolioRisk: null, kind: "risk-change", label: "B 34 → 48", txHash: "0xv", source: "CRE" },
-      { ts: 1100, portfolioRisk: 14, kind: "execution", label: "Allocation #4", txHash: "0xe", source: "CRE" },
+      { ts: 990, order: 1, portfolioRisk: null, kind: "risk-change", label: "B 34 → 48", txHash: "0xv", source: "CRE" },
+      { ts: 1100, order: 3, portfolioRisk: 14, kind: "execution", label: "Allocation #4", txHash: "0xe", source: "CRE" },
     ],
   );
   assert.equal(r?.source, "CRE");
@@ -41,7 +41,7 @@ test("CRE nodes without onchain evidence stay idle", () => {
 test("agent executions are not attributed to a CRE run", () => {
   const r = buildLastRun(
     [{ ts: 1000, kind: "decide", runId: "cre-1", source: "CRE", title: "d" }],
-    [{ ts: 1050, portfolioRisk: 21, kind: "execution", label: "Allocation #2", txHash: "0xa", source: "AGENT" }],
+    [{ ts: 1050, order: 2, portfolioRisk: 21, kind: "execution", label: "Allocation #2", txHash: "0xa", source: "AGENT" }],
   );
   assert.equal(r!.steps.find((s) => s.step === "EXECUTE")?.status, "skip");
 });

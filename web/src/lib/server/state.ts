@@ -127,7 +127,8 @@ const EVENTS = {
 };
 
 const CHUNK = 9_000n;
-const blockTimes = new Map<bigint, number>();
+// keyed by block hash: block numbers repeat across chain resets and reorgs, hashes do not
+const blockTimes = new Map<string, number>();
 
 async function logsInChunks<T>(fetcher: (from: bigint, to: bigint) => Promise<T[]>, latest: bigint): Promise<T[]> {
   const out: T[] = [];
@@ -167,7 +168,7 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
     title: string;
     detail?: string;
     source?: "CRE" | "AGENT";
-    point?: Omit<RiskPoint, "ts" | "txHash">;
+    point?: Omit<RiskPoint, "ts" | "txHash" | "order">;
   }[] = [];
   for (const l of dep as AnyLog[]) items.push({ log: l, kind: "deposit", title: `Deposited ${fmtUsdc(l.args.amount as bigint)} USDC` });
   for (const l of wd as AnyLog[]) items.push({ log: l, kind: "withdraw", title: `Withdrew ${fmtUsdc(l.args.amount as bigint)} USDC` });
@@ -205,14 +206,14 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
     });
   }
 
-  const blocks = [...new Set(items.map((i) => i.log.blockNumber!))].filter((b) => !blockTimes.has(b));
+  const blocks = [...new Set(items.map((i) => i.log.blockHash!))].filter((h) => !blockTimes.has(h));
   for (const b of blocks) {
-    blockTimes.set(b, Number((await publicClient.getBlock({ blockNumber: b })).timestamp) * 1000);
+    blockTimes.set(b, Number((await publicClient.getBlock({ blockHash: b })).timestamp) * 1000);
   }
 
   const onchain: ActivityItem[] = items.map((i) => ({
     id: `${i.log.transactionHash}-${i.log.logIndex}`,
-    ts: blockTimes.get(i.log.blockNumber!) ?? 0,
+    ts: blockTimes.get(i.log.blockHash!) ?? 0,
     kind: i.kind,
     title: i.title,
     detail: i.detail,
@@ -222,8 +223,13 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
   }));
   const riskHistory: RiskPoint[] = items
     .filter((i) => i.point)
-    .map((i) => ({ ...i.point!, ts: blockTimes.get(i.log.blockNumber!) ?? 0, txHash: i.log.transactionHash ?? undefined }))
-    .sort((a, b) => a.ts - b.ts);
+    .map((i) => ({
+      ...i.point!,
+      ts: blockTimes.get(i.log.blockHash!) ?? 0,
+      order: Number(i.log.blockNumber!) * 1e6 + (i.log.logIndex ?? 0),
+      txHash: i.log.transactionHash ?? undefined,
+    }))
+    .sort((a, b) => a.order - b.order);
   const journal = await readJournal(user);
   const offchain: (ActivityItem & { seq: number })[] = journal
     .filter((j) => j.kind !== "run")

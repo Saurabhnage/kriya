@@ -63,6 +63,7 @@ export type StateResponse = {
 
 export type RiskPoint = {
   ts: number;
+  order: number;
   portfolioRisk: number | null;
   kind: "execution" | "risk-change";
   label: string;

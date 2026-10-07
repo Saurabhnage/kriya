@@ -10,8 +10,9 @@ export type ActInput = {
   pendingViolated: boolean;
   guardrailShown: boolean;
   feedMatchesOnchain: boolean;
-  lastExecutionTs: number | null;
-  lastRiskChangeTs: number | null;
+  /** Chain order (block, log index) of the latest execution / verified risk change. */
+  lastExecutionAt: number | null;
+  lastRiskChangeAt: number | null;
 };
 
 export const ACTS: { id: Act; label: string; next: string }[] = [
@@ -30,9 +31,9 @@ export function deriveAct(i: ActInput): Act {
   if (!i.guardrailShown) return 3;
   if (
     i.feedMatchesOnchain &&
-    i.lastRiskChangeTs !== null &&
-    i.lastExecutionTs !== null &&
-    i.lastExecutionTs > i.lastRiskChangeTs
+    i.lastRiskChangeAt !== null &&
+    i.lastExecutionAt !== null &&
+    i.lastExecutionAt > i.lastRiskChangeAt
   ) {
     return "done";
   }

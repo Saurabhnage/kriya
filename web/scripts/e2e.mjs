@@ -47,6 +47,25 @@ const api = async (path, body) => {
   });
   return { status: res.status, data: await res.json() };
 };
+const ORDER = ["OBSERVE", "VERIFY", "DETECT", "DECIDE", "CONSTRAIN", "EXECUTE"];
+// The keeper streams NDJSON: one step per line as it completes, then {"done":true}.
+const runLoop = async (who) => {
+  const res = await fetch(API + "/api/keeper/run", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ user: who }),
+  });
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("content-type") ?? "", /ndjson/);
+  const lines = (await res.text()).split(/\r?\n/).filter(Boolean).map((l) => JSON.parse(l));
+  const done = lines.at(-1);
+  assert.equal(done.done, true, `stream must end with done: ${JSON.stringify(done)}`);
+  const steps = lines.slice(0, -1);
+  const idx = steps.map((s) => ORDER.indexOf(s.step)).filter((i) => i >= 0);
+  assert.deepEqual(idx, [...idx].sort((a, b) => a - b), `steps out of order: ${steps.map((s) => s.step)}`);
+  return { status: res.status, data: { steps } };
+};
+const state = async () => (await api(`/api/state?user=${user.address}`)).data;
 const send = async (address, abi, functionName, args = []) => {
   const hash = await wallet.writeContract({ address, abi, functionName, args });
   const r = await pub.waitForTransactionReceipt({ hash });
@@ -92,16 +111,22 @@ await step("decision preview returns a valid, mandate-compliant proposal", async
 });
 
 await step("loop allocates idle capital onchain: B 40 · A 35 · reserve 25", async () => {
-  const { status, data } = await api("/api/keeper/run", { user: user.address });
+  const { status, data } = await runLoop(user.address);
   assert.equal(status, 200, JSON.stringify(data));
   assert.ok(data.steps.some((s) => s.step === "EXECUTE" && s.status === "ok"), JSON.stringify(data.steps));
   assert.equal(await pos(dep.strategyB), usd(400));
   assert.equal(await pos(dep.strategyA), usd(350));
   assert.equal(await idle(), usd(250));
+  const st = await state();
+  assert.equal(st.act, 3, "after allocation the next act is Guard");
+  assert.equal(st.lastRun?.source, "AGENT");
+  assert.ok(st.lastRun.steps.some((s) => s.step === "EXECUTE" && s.txHash), "lastRun must carry the execution tx");
+  assert.equal(st.latestDecision?.validation.ok, true);
+  assert.ok(st.riskHistory.some((p) => p.kind === "execution" && p.portfolioRisk === 21));
 });
 
 await step("a second loop on a safe mandate changes nothing", async () => {
-  const { data } = await api("/api/keeper/run", { user: user.address });
+  const { data } = await runLoop(user.address);
   assert.ok(!data.steps.some((s) => s.step === "EXECUTE"), JSON.stringify(data.steps));
   assert.equal(await pos(dep.strategyB), usd(400));
 });
@@ -112,6 +137,7 @@ await step("guardrail: an unsafe 60% proposal reverts onchain with ExposureExcee
   assert.equal(data.status, "reverted");
   assert.match(data.reason, /ExposureExceeded/);
   assert.equal(await pos(dep.strategyB), usd(400), "revert must leave funds untouched");
+  assert.equal((await state()).act, 4, "after the guardrail the next act is Reality");
 });
 
 await step("changing reality flags the mandate before anything is written onchain", async () => {
@@ -119,10 +145,11 @@ await step("changing reality flags the mandate before anything is written onchai
   const { data } = await api(`/api/state?user=${user.address}`);
   assert.equal(data.snapshot.health.violated, false, "onchain view is still the old risk");
   assert.equal(data.pending.violated, true, "external view must already flag the breach");
+  assert.equal(data.act, 5, "a pending breach puts the demo in Rebalance");
 });
 
 await step("loop verifies the risk onchain and rebalances to A 40 · C 35 · reserve 25", async () => {
-  const { data } = await api("/api/keeper/run", { user: user.address });
+  const { data } = await runLoop(user.address);
   assert.ok(data.steps.some((s) => s.step === "VERIFY" && s.status === "ok"), JSON.stringify(data.steps));
   assert.equal(await pos(dep.strategyB), 0n);
   assert.equal(await pos(dep.strategyA), usd(400));
@@ -130,6 +157,9 @@ await step("loop verifies the risk onchain and rebalances to A 40 · C 35 · res
   const { data: st } = await api(`/api/state?user=${user.address}`);
   assert.equal(st.snapshot.health.violated, false);
   assert.equal(st.snapshot.health.portfolioRisk, 14);
+  assert.equal(st.act, "done");
+  assert.ok(st.riskHistory.some((p) => p.kind === "risk-change" && p.label.includes("34 → 48")));
+  assert.ok(st.riskHistory.some((p) => p.kind === "execution" && p.portfolioRisk === 14));
 });
 
 await step("activity log carries the onchain events in order", async () => {
@@ -144,7 +174,7 @@ await step("emergency exit pauses the agent and the loop does NOT redeploy the c
   await send(dep.vault, vaultAbi, "emergencyExit");
   assert.equal(await pub.readContract({ address: dep.mandate, abi: mandateAbi, functionName: "isActive", args: [user.address] }), false);
   assert.equal(await idle(), usd(1000));
-  const { data } = await api("/api/keeper/run", { user: user.address });
+  const { data } = await runLoop(user.address);
   assert.ok(!data.steps.some((s) => s.step === "EXECUTE"), JSON.stringify(data.steps));
   assert.equal(await idle(), usd(1000), "capital must stay in reserve after a human override");
 });
