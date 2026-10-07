@@ -49,3 +49,7 @@ export const DEMO_MANDATE = {
 
 export const txUrl = (hash: string) => (EXPLORER ? `${EXPLORER}/tx/${hash}` : null);
 export const addressUrl = (a: string) => (EXPLORER ? `${EXPLORER}/address/${a}` : null);
+
+/** A live mandate judges can open read-only from the landing page, per chain. */
+export const DEMO_VIEW_ADDRESS: string | null =
+  ({ 11155111: "0x09855cE865D094F6c2F2B5A13F64FC6F82b3B4C7", 31337: "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc" } as Record<number, string>)[CHAIN_ID] ?? null;
