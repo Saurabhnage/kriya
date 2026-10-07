@@ -430,7 +430,24 @@ function Override({ user, state, readOnly, refresh }: { user: Address; state: St
         >
           {s.mandate.active ? "Pause agent" : "Resume agent"}
         </button>
-        <button className="btn btn-warn" disabled={readOnly || !!busy} onClick={() => act("Exiting", { address: deployment.vault, abi: KriyaVaultAbi as Abi, functionName: "emergencyExit" })}>
+        <button
+          className="btn btn-warn"
+          disabled={readOnly || !!busy}
+          onClick={async () => {
+            // Pause first so the agent can't redeploy the capital being pulled out
+            // (contracts deployed after this fix also pause inside emergencyExit itself).
+            try {
+              if (s.mandate.active) {
+                await send("Pausing agent", { address: deployment.mandate, abi: KriyaMandateAbi as Abi, functionName: "setActive", args: [false] });
+              }
+              await send("Exiting to reserve", { address: deployment.vault, abi: KriyaVaultAbi as Abi, functionName: "emergencyExit" });
+            } catch {
+              // useTx surfaces the error
+            } finally {
+              refresh();
+            }
+          }}
+        >
           Emergency exit to reserve
         </button>
         <button

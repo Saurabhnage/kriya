@@ -7,6 +7,8 @@ import { KriyaVaultAbi, MockUSDCAbi } from "@/lib/generated/abis";
 import { shortName, usd, type StateResponse } from "@/lib/client";
 import { useTx } from "./useTx";
 
+const FAUCET_LIMIT = 10_000;
+
 type Props = { state: StateResponse; user: Address; readOnly?: boolean; onDone: () => void };
 
 type SliderProps = { label: string; value: number; set: (n: number) => void; min: number; max: number; unit?: string; hint: string };
@@ -39,14 +41,24 @@ export function MandateBuilder({ state, user, readOnly, onDone }: Props) {
   const [allowed, setAllowed] = useState<string[]>(strategies.map((s) => s.address));
   const { send, busy, error } = useTx();
 
+  const capitalError =
+    !Number.isFinite(capital) || capital <= 0
+      ? "Enter an amount above 0"
+      : capital - Number(state.snapshot.walletUsdc) / 1e6 > FAUCET_LIMIT
+        ? `The test USDC faucet mints at most ${FAUCET_LIMIT.toLocaleString()} at a time`
+        : !/^\d+(\.\d{1,6})?$/.test(String(capital))
+          ? "USDC has at most 6 decimals"
+          : null;
+
   async function program() {
     const amount = parseUnits(String(capital), 6);
-    if (BigInt(state.snapshot.walletUsdc) < amount) {
+    const balance = BigInt(state.snapshot.walletUsdc);
+    if (balance < amount) {
       await send("Minting test USDC", {
         address: deployment.usdc,
         abi: MockUSDCAbi as Abi,
         functionName: "faucet",
-        args: [user, amount],
+        args: [user, amount - balance],
       });
     }
     if (BigInt(state.snapshot.allowance) < amount) {
@@ -94,6 +106,7 @@ export function MandateBuilder({ state, user, readOnly, onDone }: Props) {
               onChange={(e) => setCapital(Number(e.target.value))}
               className="mt-1 w-full rounded-lg border border-line bg-bg px-3 py-2 font-mono text-xl"
             />
+            {capitalError && <p className="mt-1 text-xs text-danger">{capitalError}</p>}
             <p className="mt-1 text-xs text-muted">Wallet: {usd(state.snapshot.walletUsdc)} USDC · missing amount is minted from the testnet faucet</p>
           </div>
           <div>
@@ -144,7 +157,7 @@ export function MandateBuilder({ state, user, readOnly, onDone }: Props) {
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
-        <button className="btn btn-primary" disabled={readOnly || !!busy || allowed.length === 0 || capital <= 0} onClick={() => program().catch(() => {})}>
+        <button className="btn btn-primary" disabled={readOnly || !!busy || allowed.length === 0 || !!capitalError} onClick={() => program().catch(() => {})}>
           {readOnly ? "Connect your wallet to program a mandate" : busy ?? `Program mandate · ${capital.toLocaleString()} USDC`}
         </button>
         <span className="text-xs text-muted">

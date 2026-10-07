@@ -125,3 +125,28 @@ export async function readJournal(user?: string): Promise<JournalEntry[]> {
     : loadLocal<JournalEntry[]>(`journal-${deployment.chainId}`, () => []);
   return user ? list.filter((e) => !e.user || e.user.toLowerCase() === user.toLowerCase()) : list;
 }
+
+// ------------------------------------------------------------------ rate limiting
+// The agent endpoints spend real testnet gas and Claude credits, so each is capped per
+// fixed window across all instances (Redis) — or per process when running locally.
+
+const windows = new Map<string, { count: number; resetAt: number }>();
+
+export async function rateLimit(name: string, limit: number, windowSec: number): Promise<{ ok: boolean; retryAfter: number }> {
+  const bucket = Math.floor(Date.now() / 1000 / windowSec);
+  const retryAfter = (bucket + 1) * windowSec - Math.floor(Date.now() / 1000);
+  if (redisEnabled) {
+    const key = ns(`rl:${name}:${bucket}`);
+    const count = await redis<number>("INCR", key);
+    if (count === 1) await redis("EXPIRE", key, windowSec + 5);
+    return { ok: count <= limit, retryAfter };
+  }
+  const w = windows.get(name);
+  const now = Date.now();
+  if (!w || now >= w.resetAt) {
+    windows.set(name, { count: 1, resetAt: now + windowSec * 1000 });
+    return { ok: true, retryAfter };
+  }
+  w.count += 1;
+  return { ok: w.count <= limit, retryAfter: Math.ceil((w.resetAt - now) / 1000) };
+}

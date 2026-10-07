@@ -1735,6 +1735,19 @@ export const KriyaMandateAbi = [
   },
   {
     "type": "function",
+    "name": "pauseFor",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "renounceOwnership",
     "inputs": [],
     "outputs": [],

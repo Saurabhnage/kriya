@@ -83,8 +83,9 @@ contract KriyaVault is Ownable, ReentrancyGuard {
         emit Withdrawn(msg.sender, amount);
     }
 
-    /// @notice Human override: pull every position back into the reserve immediately.
+    /// @notice Human override: suspend the agent and pull every position back into the reserve.
     function emergencyExit() external nonReentrant {
+        mandate.pauseFor(msg.sender);
         address[] memory list = registry.strategies();
         uint256 recovered;
         for (uint256 i = 0; i < list.length; i++) {

@@ -62,8 +62,17 @@ contract KriyaMandate is Ownable {
         emit MandateStatusChanged(msg.sender, active);
     }
 
+    /// @notice Lets the vault suspend the agent's authority as part of an emergency exit.
+    function pauseFor(address user) external {
+        if (msg.sender != vault) revert NotAuthorized();
+        if (!s_mandates[user].active) return;
+        s_mandates[user].active = false;
+        emit MandateStatusChanged(user, false);
+    }
+
     function _setMandate(address user, Params calldata params, address[] calldata allowedStrategies) internal {
-        if (params.maxRisk == 0 || params.maxRisk > 100) revert InvalidParams("maxRisk");
+        // the USDC reserve itself carries risk 2, so a lower limit could never be satisfied
+        if (params.maxRisk < 2 || params.maxRisk > 100) revert InvalidParams("maxRisk");
         if (params.maxExposureBps == 0 || params.maxExposureBps > 10_000) revert InvalidParams("maxExposure");
         if (params.maxDrawdownBps > 10_000) revert InvalidParams("maxDrawdown");
         if (params.minReserveBps > 10_000) revert InvalidParams("minReserve");

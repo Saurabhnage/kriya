@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  contracts:
+    name: Contracts (Foundry, incl. fuzz)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: contracts } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: forge build --sizes
+      - run: forge test -vv
+
+  web:
+    name: Web (types, lint, unit tests, build)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: web } }
+    env:
+      NEXT_PUBLIC_CHAIN_ID: "11155111"
+      KRIYA_LLM: "off"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: web/package-lock.json }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx eslint src
+      - run: npm test
+      - run: npm run build
+
+  cre:
+    name: CRE workflow (types)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: cre/kriya-workflow } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --ignore-scripts
+      - run: bunx tsc --noEmit
+
+  e2e:
+    name: End-to-end (Anvil + API + wallet)
+    runs-on: ubuntu-latest
+    needs: [contracts, web]
+    env:
+      MNEMONIC: "test test test test test test test test test test test junk"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: web/package-lock.json }
+      - name: Start Anvil and deploy KRIYA
+        working-directory: contracts
+        run: |
+          anvil --silent &
+          for i in $(seq 1 30); do cast block-number >/dev/null 2>&1 && break; sleep 1; done
+          PRIVATE_KEY=$(cast wallet private-key "$MNEMONIC" 0) \
+          AGENT_ADDRESS=$(cast wallet address $(cast wallet private-key "$MNEMONIC" 2)) \
+          CRE_FORWARDER=$(cast wallet address $(cast wallet private-key "$MNEMONIC" 1)) \
+          forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
+      - name: Start the KRIYA server against Anvil
+        working-directory: web
+        run: |
+          npm ci
+          npm run sync
+          export NEXT_PUBLIC_CHAIN_ID=31337 KRIYA_LLM=off
+          export ADMIN_PRIVATE_KEY=$(cast wallet private-key "$MNEMONIC" 0)
+          export AGENT_PRIVATE_KEY=$(cast wallet private-key "$MNEMONIC" 2)
+          npx next dev -p 3001 > /tmp/next.log 2>&1 &
+          for i in $(seq 1 90); do curl -sf http://localhost:3001/api/risk-feed >/dev/null && break; sleep 2; done
+      - name: Run end-to-end suite
+        working-directory: web
+        run: npm run e2e
+      - if: failure()
+        run: tail -100 /tmp/next.log

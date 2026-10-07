@@ -1,6 +1,6 @@
 import { getRiskFeed, journal, resetRiskFeed, setRisk } from "@/lib/server/store";
 import { readStrategies } from "@/lib/server/state";
-import { fail, json } from "@/lib/server/http";
+import { fail, json, limited } from "@/lib/server/http";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +16,8 @@ export async function GET() {
 
 // Demo control: "change reality". Body: { strategy, risk } or { reset: true }
 export async function POST(request: Request) {
+  const blocked = await limited("risk-feed-write", 20, 60);
+  if (blocked) return blocked;
   try {
     const body = await request.json();
     if (body.reset) {

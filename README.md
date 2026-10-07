@@ -170,6 +170,17 @@ Each run executes one full loop. Writes go through the MockKeystoneForwarder int
 
 The **Run autonomous loop** button in the dashboard runs the identical loop from the KRIYA server (agent + owner keys) as a fallback when CRE is unavailable. Those executions are tagged **AGENT**.
 
+## Testing
+
+| Layer | What runs | Command |
+| --- | --- | --- |
+| Contracts | 19 unit tests + 4 fuzz properties (1,000 runs each): funds are always conserved, `validateAllocation` always agrees with execution, every executed allocation leaves the mandate compliant, a strategy above max risk can never be held | `cd contracts && forge test` |
+| Policy engine | 12 tests mirroring the contract cases, plus 2,000 random mandates checking the optimizer never produces an invalid allocation | `cd web && npm test` |
+| End to end | 15 checks against Anvil + the real API + wallet transactions: open mandate, allocate, guardrail revert, risk spike, verified rebalance, emergency exit, input validation, rate limits | `cd web && npm run e2e` (setup in `web/scripts/e2e.mjs`) |
+| CRE workflow | Typecheck + WASM build | `cd cre && cre workflow build kriya-workflow` |
+
+GitHub Actions runs all of it, including the end-to-end suite on a fresh Anvil chain, on every push (`.github/workflows/ci.yml`).
+
 ## 3-minute demo script
 
 1. **Objective (0:00):** connect wallet → *Program mandate* ($1,000, max risk 40, exposure 40%, reserve 25%). One wallet flow: faucet → approve → `openMandate`.
@@ -184,5 +195,6 @@ The **Run autonomous loop** button in the dashboard runs the identical loop from
 - The AI holds no keys and never controls funds. Its output is schema-constrained JSON, validated offchain, validated in CRE, and validated onchain.
 - The agent key can only call `executeAllocation`, which runs the same checks as CRE reports. Funds can only move between the vault and allowlisted strategies.
 - Only the configured Keystone forwarder can deliver reports. Workflow ID/owner checks can be enabled via `ReceiverTemplate` setters.
-- User override: pause the mandate (`setActive(false)`), `emergencyExit()`, and `withdraw()`. Owner-level emergency pause: `KriyaExecutor.setPaused`.
+- User override: pause the mandate (`setActive(false)`), `emergencyExit()`, and `withdraw()`. `emergencyExit()` also pauses the mandate, so the agent cannot redeploy capital the user just pulled out (the live Sepolia contracts predate this; the dashboard pauses before exiting there). Owner-level emergency pause: `KriyaExecutor.setPaused`.
+- The gas- and credit-spending API routes are rate limited across instances (Redis), so a public demo URL cannot drain the agent wallet.
 - Limits enforced: per-strategy exposure caps, per-strategy and portfolio risk caps, minimum liquidity reserve, drawdown floor vs high-water mark, strategy allowlist, auto-rebalance opt-in.

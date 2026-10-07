@@ -1,6 +1,6 @@
 import { propose } from "@/lib/server/agent";
 import { decisionInput, journalProposal } from "@/lib/server/loop";
-import { fail, json, parseUser } from "@/lib/server/http";
+import { fail, json, parseUser, limited } from "@/lib/server/http";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -8,6 +8,8 @@ export const maxDuration = 120;
 // Called by the Chainlink CRE workflow (and the dashboard) to obtain a validated proposal.
 // Body: { user, risks?: { [strategyAddress]: verifiedRisk } }
 export async function POST(request: Request) {
+  const blocked = await limited("propose", 20, 60);
+  if (blocked) return blocked;
   try {
     const body = await request.json();
     const user = parseUser(body.user);

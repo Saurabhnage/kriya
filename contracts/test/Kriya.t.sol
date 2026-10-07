@@ -262,6 +262,27 @@ contract KriyaTest is Test {
         vault.moveToStrategy(user, stratA, 1);
     }
 
+    function test_RevertWhen_MandateRiskLimitBelowReserveRisk() public {
+        KriyaMandate.Params memory p = _demoParams();
+        p.maxRisk = 1;
+        vm.prank(user);
+        vm.expectRevert(abi.encodeWithSelector(KriyaMandate.InvalidParams.selector, "maxRisk"));
+        mandate.setMandate(p, _all());
+    }
+
+    function test_EmergencyExitPausesAgentAuthority() public {
+        _initialAllocation();
+        vm.prank(user);
+        vault.emergencyExit();
+        assertFalse(mandate.isActive(user), "exit must pause the mandate");
+
+        // the agent must not be able to redeploy the capital the user just pulled out
+        (address[] memory s, uint16[] memory w) = _alloc(stratA, 3500, stratB, 4000);
+        vm.prank(agent);
+        vm.expectRevert(abi.encodeWithSelector(KriyaExecutor.MandateInactive.selector, user));
+        executor.executeAllocation(user, s, w, "re-enter after exit");
+    }
+
     function test_EmergencyExitAndWithdraw() public {
         _initialAllocation();
         vm.startPrank(user);
