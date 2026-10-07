@@ -183,12 +183,14 @@ GitHub Actions runs all of it, including the end-to-end suite on a fresh Anvil c
 
 ## 3-minute demo script
 
-1. **Objective (0:00):** connect wallet → *Program mandate* ($1,000, max risk 40, exposure 40%, reserve 25%). One wallet flow: faucet → approve → `openMandate`.
-2. **KRIYA decides (0:20):** *Preview decision* shows Claude's allocation, rationale and per-strategy assessment. Then run the CRE workflow (or *Run autonomous loop*) to execute **B 40 · A 35 · Reserve 25** onchain.
-3. **Constraint layer (1:00):** *Guardrail test* submits an unsafe 60% allocation from the agent key. The tx **reverts onchain** with `ExposureExceeded`, and the explorer link proves it.
-4. **Change reality (1:30):** *Spike Strategy B risk → 48*. The dashboard flags **⚠ MANDATE AT RISK** (external signal, unverified).
-5. **Autonomous rebalance (2:00):** run CRE again. Logs show VERIFY (risk report onchain) → DETECT → DECIDE (Claude) → CONSTRAIN → EXECUTE.
-6. **Final state (2:30):** A 40 · C 35 · Reserve 25, risk 14/40, mandate **✓ SAFE**, every step in the activity log with tx hashes.
+The dashboard is a one-screen **mission control**: mandate and allocation on the left, the live loop pipeline and Claude's decision in the centre, the activity timeline on the right. The **stage bar** at the bottom shows which act you are in (1 Program → 2 Decide → 3 Guard → 4 Reality → 5 Rebalance → Done) and highlights the next button to press. Judges without a wallet can open the live demo mandate read-only from the landing page.
+
+1. **Program (0:00):** connect wallet → set limits; the live preview shows what KRIYA would allocate before you sign. *Program mandate* walks through mint → approve → `openMandate` with a step checklist.
+2. **Decide (0:20):** *Preview decision* fills the decision card with Claude's allocation, rationale and per-strategy assessment. *Run loop* (or the CRE workflow) streams OBSERVE → VERIFY → DETECT → DECIDE → CONSTRAIN → EXECUTE into the pipeline as each step lands: **B 40 · A 35 · Reserve 25** onchain.
+3. **Guard (1:00):** *Guardrail test* submits an unsafe 60% allocation from the agent key; it **reverts onchain** with `ExposureExceeded`.
+4. **Reality (1:30):** *Spike B → 48*. The status badge flips to **⚠ AT RISK** (external signal) and the gauge shows the unverified reading.
+5. **Rebalance (2:00):** *Run loop* again (or CRE): VERIFY writes the risk onchain, DECIDE exits B, EXECUTE rebalances. The risk chart steps down from 21 to 14.
+6. **Done (2:30):** A 40 · C 35 · Reserve 25, risk 14/40, **✓ SAFE**. *Reset feed* replays the story.
 
 ## Security model
 
