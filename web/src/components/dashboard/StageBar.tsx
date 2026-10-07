@@ -71,7 +71,7 @@ export function StageBar({ state, readOnly, running, previewing, onRun, onPrevie
 
   const button = (action: Action, label: string, onClick: () => void, extra = "") => (
     <button
-      className={`btn whitespace-nowrap ${suggested === action ? "btn-primary ring-2 ring-accent/30" : ""} ${extra}`}
+      className={`btn whitespace-nowrap px-3 py-1.5 ${suggested === action ? "btn-primary ring-2 ring-accent/30" : ""} ${extra}`}
       disabled={disabled || (action === "preview" && previewing)}
       onClick={onClick}
       title={suggested === action ? "Suggested next step" : undefined}
@@ -93,12 +93,12 @@ export function StageBar({ state, readOnly, running, previewing, onRun, onPrevie
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-[#0a0d12]/95 backdrop-blur">
-      <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
+    <div className="mt-3 rounded-xl border border-line bg-[#0a0d12]/95 backdrop-blur min-[1100px]:fixed min-[1100px]:inset-x-0 min-[1100px]:bottom-0 min-[1100px]:z-40 min-[1100px]:mt-0 min-[1100px]:rounded-none min-[1100px]:border-x-0 min-[1100px]:border-b-0">
+      <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 min-[1100px]:h-[60px] min-[1100px]:flex-nowrap">
         <button className="label shrink-0 hover:text-ink" onClick={toggle} aria-expanded={!collapsed}>
           {collapsed ? "▴ Demo" : "▾ Demo"}
         </button>
-        <ol className="flex flex-wrap items-center gap-1" aria-label="Demo acts">
+        <ol className="flex flex-wrap items-center gap-1 min-[1100px]:shrink-0" aria-label="Demo acts">
           {ACTS.map((a, i) => {
             const current = a.id === act;
             const passed = act === "done" || (typeof a.id === "number" && typeof act === "number" && a.id < act);
@@ -107,6 +107,7 @@ export function StageBar({ state, readOnly, running, previewing, onRun, onPrevie
                 <span
                   className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${current ? "bg-accent text-[#04130d]" : passed ? "text-accent" : "text-muted"}`}
                   aria-current={current ? "step" : undefined}
+                  title={current ? `Next: ${a.next}` : undefined}
                 >
                   {passed && !current ? "✓ " : typeof a.id === "number" ? `${a.id} ` : ""}
                   {a.label}
@@ -118,8 +119,8 @@ export function StageBar({ state, readOnly, running, previewing, onRun, onPrevie
         </ol>
         {!collapsed && (
           <>
-            <span className="hidden text-xs text-muted lg:inline">Next: {ACTS.find((a) => a.id === act)?.next}</span>
-            <div className="ml-auto flex flex-wrap items-center gap-2">
+            <span className="hidden truncate text-xs text-muted min-[1700px]:inline">Next: {ACTS.find((a) => a.id === act)?.next}</span>
+            <div className="ml-auto flex flex-wrap items-center gap-2 min-[1100px]:flex-nowrap">
               {button("preview", "Preview decision", onPreview)}
               {button("run", "Run loop", onRun)}
               {b &&
@@ -147,7 +148,7 @@ export function StageBar({ state, readOnly, running, previewing, onRun, onPrevie
                   ⋯
                 </button>
                 {menu && (
-                  <div role="menu" className="absolute right-0 bottom-12 w-64 rounded-xl border border-line bg-panel p-2 shadow-xl">
+                  <div role="menu" className="absolute right-0 bottom-12 z-50 w-64 rounded-xl border border-line bg-panel p-2 shadow-xl">
                     <p className="px-2 pb-1 text-[11px] text-muted">
                       {readOnly ? "Read-only: connect the owner's wallet to use these." : "Human override — you keep final authority."}
                     </p>

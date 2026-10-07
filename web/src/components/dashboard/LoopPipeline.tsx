@@ -46,15 +46,18 @@ export function LoopPipeline({ live, running, lastRun }: { live: LoopStep[] | nu
 
   return (
     <Panel title="Autonomous loop" right={header}>
-      <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3 min-[1100px]:grid-cols-6" aria-label="Loop pipeline">
+      <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3" aria-label="Loop pipeline">
         {NODES.map((node, i) => {
           const step = latest(node);
           const state: NodeState = step ? step.status : running && i === firstMissing ? "running" : "idle";
           const st = STYLE[state];
           return (
-            <li key={`${node}-${step?.detail ?? state}`} className={`relative flex min-h-[112px] flex-col rounded-xl border p-2.5 transition-colors ${st.box}`}>
+            <li key={`${node}-${step?.detail ?? state}`} className={`relative flex min-h-[96px] flex-col rounded-xl border p-2.5 transition-colors ${st.box}`}>
               <div className="flex items-center justify-between">
-                <span className={`font-mono text-[11px] font-semibold tracking-wide ${st.text}`}>{node}</span>
+                <span className={`font-mono text-[11px] font-semibold tracking-wide ${st.text}`}>
+                  <span className="mr-1 text-muted">{i + 1}</span>
+                  {node}
+                </span>
                 <span className={`text-sm ${st.text}`} aria-label={state}>
                   {st.mark}
                 </span>
@@ -63,11 +66,6 @@ export function LoopPipeline({ live, running, lastRun }: { live: LoopStep[] | nu
                 {step?.detail ?? BLURB[node]}
               </p>
               {step?.txHash && <TxLink hash={step.txHash} className="mt-auto pt-1 text-[11px]" />}
-              {i < NODES.length - 1 && (
-                <span aria-hidden className="absolute top-1/2 -right-[9px] z-10 hidden text-xs text-accent-2/60 min-[1100px]:block">
-                  ▸
-                </span>
-              )}
             </li>
           );
         })}

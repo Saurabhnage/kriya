@@ -82,9 +82,9 @@ export function Dashboard({ state, user, readOnly, refresh, onRunningChange }: P
 
   return (
     <>
-      <div className="grid gap-3 pb-20 min-[1100px]:h-[calc(100vh-128px)] min-[1100px]:grid-cols-12 min-[1100px]:pb-0">
+      <div className="grid grid-cols-1 gap-3 min-[1100px]:h-[calc(100vh-148px)] min-[1100px]:grid-cols-12 min-[1100px]:pb-0">
         {/* centre first in the DOM so the loop leads on small screens */}
-        <div className="flex min-h-0 flex-col gap-3 min-[1100px]:order-2 min-[1100px]:col-span-6">
+        <div className="flex min-h-0 min-w-0 flex-col gap-3 min-[1100px]:order-2 min-[1100px]:col-span-6">
           <LoopPipeline live={live} running={running} lastRun={state.lastRun} />
           <DecisionCard decision={decision} state={state} previewing={previewing} />
           <Panel title="Portfolio risk over time" right={<span className="text-[11px] text-muted">after each execution · ◆ verified risk change</span>}>
@@ -93,11 +93,11 @@ export function Dashboard({ state, user, readOnly, refresh, onRunningChange }: P
             </div>
           </Panel>
         </div>
-        <div className="flex min-h-0 flex-col gap-3 min-[1100px]:order-1 min-[1100px]:col-span-3">
+        <div className="flex min-h-0 min-w-0 flex-col gap-3 min-[1100px]:order-1 min-[1100px]:col-span-3">
           <MandateCard state={state} />
           <AllocationPanel state={state} />
         </div>
-        <div className="flex min-h-0 flex-col min-[1100px]:order-3 min-[1100px]:col-span-3 max-[1099px]:h-[520px]">
+        <div className="flex min-h-0 min-w-0 flex-col min-[1100px]:order-3 min-[1100px]:col-span-3 max-[1099px]:h-[520px]">
           <ActivityTimeline items={state.activity} />
         </div>
       </div>

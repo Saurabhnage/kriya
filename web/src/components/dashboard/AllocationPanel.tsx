@@ -40,7 +40,7 @@ export function AllocationPanel({ state }: { state: StateResponse }) {
                     {r.name.split(" - ")[0]}
                   </span>
                   <span className="font-mono">{r.share.toFixed(0)}%</span>
-                  <span className={`w-14 text-right font-mono ${over ? "text-danger" : "text-muted"}`} title={over ? `Risk ${r.risk} exceeds the mandate max ${max}` : `Risk ${r.risk}`}>
+                  <span className={`whitespace-nowrap text-right font-mono ${over ? "text-danger" : "text-muted"}`} title={over ? `Risk ${r.risk} exceeds the mandate max ${max}` : `Risk ${r.risk}`}>
                     r{r.risk}
                     {r.feedRisk !== r.risk && <span className="text-warn">→{r.feedRisk}?</span>}
                   </span>
@@ -51,11 +51,11 @@ export function AllocationPanel({ state }: { state: StateResponse }) {
               <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: RESERVE_COLOR }} />
               <span className="flex-1">Reserve</span>
               <span className="font-mono">{reserveShare.toFixed(0)}%</span>
-              <span className="w-14 text-right font-mono text-muted">${usd(s.idle).split(".")[0]}</span>
+              <span className="whitespace-nowrap text-right font-mono text-muted">${usd(s.idle).split(".")[0]}</span>
             </li>
           </ul>
         </div>
-        <div className="mt-3">
+        <div className="mx-auto mt-3 max-w-[230px]">
           <Gauge value={s.health.portfolioRisk} max={max} ghost={ghost} label="Portfolio risk" />
           <p className="-mt-1 text-center text-xs text-muted">
             Portfolio risk <span className="font-mono text-ink">{s.health.portfolioRisk}</span> / {max}
