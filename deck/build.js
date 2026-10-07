@@ -269,30 +269,25 @@ const S3 = "The working loop, live on Ethereum Sepolia";
 {
   const s = pres.addSlide({ masterName: "KRIYA Dark Blank", sectionTitle: S3 });
   s.background = { color: N.dash };
-  text(s, "KRIYA", { x: 128, y: 96, w: 600, h: 70, size: 56, bold: true, color: N.inkDark, spacing: 12 });
-  text(s, "Sepolia · live dashboard", { x: 1412, y: 106, w: 380, h: 50, size: 24, font: MONO, color: "8592A6", lineColor: N.dashLine, radius: 25, align: "center", valign: "middle" });
-  const stats = [["Capital", "$1,000.00"], ["Expected yield", "7.42%"], ["Risk", "21 / 40"], ["Mandate", "✓ SAFE"]];
-  const sw = (1664 - 72) / 4;
-  stats.forEach(([k, v], i) => {
-    const x = 128 + i * (sw + 24);
-    box(s, { x, y: 210, w: sw, h: 150, fill: N.dashPanel, line: i === 3 ? "2F6B57" : N.dashLine, name: `${k} stat` });
-    text(s, k, { x: x + 28, y: 236, w: sw - 56, h: 34, size: 24, color: "8592A6" });
-    text(s, v, { x: x + 28, y: 280, w: sw - 56, h: 60, size: 44, font: i === 3 ? undefined : MONO, bold: i === 3, color: i === 3 ? THEME.colors.accent1 : N.inkDark });
+  eyebrow(s, "Live dashboard · Sepolia", C.accent1, 200, 128, 440);
+  text(s, "Mission control", { x: 128, y: 250, w: 440, h: 180, size: 72, bold: true, color: N.inkDark, lh: 1.05, name: "Title" });
+  const points = [
+    ["Live loop", "Each of the six steps streams in as it lands, with its transaction"],
+    ["Claude's decision", "Rationale, allocation and the policy check, side by side"],
+    ["Stage bar", "Walks judges through the five demo acts, one click each"],
+  ];
+  points.forEach(([head, body], i) => {
+    const y = 470 + i * 150;
+    s.addShape(pres.ShapeType.ellipse, { x: px(128), y: px(y + 6), w: px(18), h: px(18), fill: { color: THEME.colors.accent1 }, line: { type: "none" }, objectName: `Point ${i + 1} dot` });
+    text(s, head, { x: 166, y, w: 402, h: 40, size: 30, bold: true, color: N.inkDark, name: `Point ${i + 1}` });
+    text(s, body, { x: 166, y: y + 44, w: 402, h: 90, size: 24, color: N.mutedDark, lh: 1.25, name: `Point ${i + 1} detail` });
   });
-  const lw = 960;
-  box(s, { x: 128, y: 390, w: lw, h: 520, fill: N.dashPanel, line: N.dashLine, name: "Allocation panel" });
-  text(s, "Allocation", { x: 160, y: 418, w: 400, h: 34, size: 24, color: "8592A6" });
-  bar(s, 160, 470, lw - 64, 24, [[40, THEME.colors.accent2], [35, THEME.colors.accent1], [25, N.reserve]]);
-  const rows = [["Strategy", "APY", "Risk", "Weight"], ["B · LP Yield", "11.2%", "34", "40%"], ["A · Stable Lending", "8.4%", "21", "35%"], ["C · T-Bill Vault", "6.8%", "15", "0%"], ["USDC Reserve", "—", "2", "25%"]];
-  s.addTable(rows.map((r, i) => r.map((c, j) => ({ text: c, options: { color: i === 0 ? "8592A6" : N.inkDark, align: j === 0 ? "left" : "right" } }))),
-    { x: px(160), y: px(530), w: px(lw - 64), colW: [px(436), px(160), px(140), px(160)], fontFace: MONO, fontSize: pt(24), rowH: px(66), valign: "middle", border: { type: "solid", color: N.dashLine, pt: 0.75 }, margin: [0, px(10), 0, px(10)], objectName: "Allocation table" });
-  const ax = 128 + lw + 24, aw = 1664 - lw - 24;
-  box(s, { x: ax, y: 390, w: aw, h: 520, fill: N.dashPanel, line: N.dashLine, name: "Activity panel" });
-  text(s, "KRIYA activity", { x: ax + 32, y: 418, w: aw - 64, h: 34, size: 24, color: "8592A6" });
-  const acts = [["⚡", THEME.colors.accent1, "CRE rebalance · Claude decision"], ["⚠", THEME.colors.accent4, "Verified risk: B 34 → 48"], ["✗", THEME.colors.accent6, "Unsafe 60% proposal reverted"], ["◆", THEME.colors.accent1, "Mandate active · KRIYA authorized"]];
-  acts.forEach(([icon, color, label], i) => text(s, [{ text: `${icon}  `, options: { color } }, { text: label }], { x: ax + 32, y: 480 + i * 90, w: aw - 64, h: 70, size: 24, color: N.inkDark, lh: 1.2 }));
-  text(s, "Rebuilt from the live Sepolia state at kriya-beta.vercel.app · every activity row links to its transaction", { x: 128, y: 952, w: 1664, h: 40, size: 24, font: MONO, color: N.dimDark, name: "Footer" });
-  s.addNotes("This is the dashboard judges can open themselves. Capital, expected yield, risk against the mandate limit, mandate status, the allocation, and an activity log that interleaves onchain events with the agent's decisions, each linked to Etherscan.");
+  // real screenshot of the live site (deck/assets/dashboard.png, 2880×1800)
+  const iw = 1172, ih = Math.round((iw * 1800) / 2880), ix = 620, iy = Math.round((1080 - ih) / 2) - 20;
+  box(s, { x: ix - 6, y: iy - 6, w: iw + 12, h: ih + 12, fill: N.dashLine, r: 14, name: "Screenshot frame" });
+  s.addImage({ path: path.join(__dirname, "assets", "dashboard.png"), x: px(ix), y: px(iy), w: px(iw), h: px(ih), altText: "KRIYA mission control dashboard on Ethereum Sepolia after a Claude-driven rebalance: six-step loop pipeline, latest decision, risk chart, activity timeline, and the demo stage bar at Done", objectName: "Dashboard screenshot" });
+  text(s, "Live on Sepolia · kriya-beta.vercel.app · right after Claude exited a strategy that breached the mandate", { x: 620, y: iy + ih + 22, w: 1172, h: 40, size: 22, color: N.dimDark, name: "Caption" });
+  s.addNotes("This is the real product, live on Sepolia, captured right after an autonomous rebalance. Strategy C's verified risk jumped to 45, over the mandate's limit of 40. The loop verified it onchain, Claude decided to exit C, the policy check passed, and the executor rebalanced: portfolio risk is now 9 of 40. Every step in the pipeline links to its transaction, and the stage bar shows the demo is complete.");
 }
 
 // ------------------------------------------------------------------ 10 proof
