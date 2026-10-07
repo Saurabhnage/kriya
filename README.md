@@ -34,7 +34,7 @@ End-to-end loop executed on Sepolia:
 
 > **Decision engine:** Claude (`claude-sonnet-5-5`) proposes allocations as schema-bound JSON; the policy engine, the CRE workflow and the executor contract each re-validate it. If Claude is unavailable (or `KRIYA_LLM=off`), the transparent deterministic optimizer takes over.
 
-**Chainlink CRE workflow** (`cre workflow simulate kriya-workflow --broadcast`), reports delivered through the Sepolia Keystone forwarder, decision by Claude (`claude-sonnet-5-5`):
+**Chainlink CRE workflow** — full simulation evidence: [docs/CRE_SIMULATION.md](docs/CRE_SIMULATION.md) (`cre workflow simulate kriya-workflow --broadcast`), reports delivered through the Sepolia Keystone forwarder, decision by Claude (`claude-sonnet-5-5`):
 
 | CRE step | Tx |
 | --- | --- |

@@ -1,0 +1,29 @@
+Initializing...
+Loading settings...
+Checking RPC connectivity...
+Compiling workflow...
+✓ Workflow compiled
+✓ Simulation limits enabled
+  HTTP: req=120kb resp=250kb timeout=10s | ConfHTTP: req=125kb resp=500kb timeout=1m30s | Consensus obs=25kb | ChainWrite report=50kb gas=10000000 | WASM binary=100mb compressed=20mb
+  Binary hash: bfc7d22a5174e124fd81b9d318aff70238eb89f635aa7ebd4f53d72ebbb3aea1
+  Config hash: df34a7997ee9973c7fae137e3f35125cfa36f1a0b6a64d307106a0ee4740525f
+2026-10-08T00:14:15Z [SIMULATION] Simulator Initialized
+
+2026-10-08T00:14:15Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
+2026-10-08T00:14:16Z [USER LOG] [OBSERVE] risk feed: 0x5d59be=15, 0xe62be5=48, 0xe92168=21
+2026-10-08T00:14:16Z [USER LOG] [VERIFY] onchain risk scores match verified feed
+2026-10-08T00:14:17Z [USER LOG] [DETECT] 0x09855cE865D094F6c2F2B5A13F64FC6F82b3B4C7: MANDATE AT RISK — Strategy B - LP Yield risk 48 exceeds mandate max 40
+2026-10-08T00:14:24Z [USER LOG] [DECIDE] llm (claude-sonnet-5-5): 0xE92168=4000, 0x5d59Be=3500 — Strategy B's risk of 48 exceeds the mandate max of 40, so its 40% is exited. Strategy A rises to the 40% cap and Strategy C gets 35%. The 25% USDC reserve is kept.
+2026-10-08T00:14:24Z [USER LOG] [CONSTRAIN] passed: portfolio risk 14/40, reserve 25%
+2026-10-08T00:14:24Z [USER LOG] [EXECUTE] rebalance written onchain tx=0x0000000000000000000000000000000000000000000000000000000000000000
+2026-10-08T00:14:25Z [USER LOG] [DETECT] 0xe38B81cB7f60D44f5BFC84ec4E8836293059BFc4: mandate safe (risk 14/40)
+
+✓ Workflow Simulation Result:
+"0x09855c executed 0x0000000000000000000000000000000000000000000000000000000000000000"
+
+2026-10-08T00:14:25Z [SIMULATION] Execution finished signal received
+2026-10-08T00:14:25Z [SIMULATION] Skipping WorkflowEngineV2
+2026-10-08T00:14:25Z [SIMULATION] Failed to cleanup beholder error=BeholderClient has not been started: cannot stop unstarted service
+time=2026-10-08T00:14:25.321+08:00 level=INFO msg="context canceled"
+
+
