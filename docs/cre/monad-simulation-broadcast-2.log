@@ -1,0 +1,24 @@
+Initializing...
+Loading settings...
+Checking RPC connectivity...
+Compiling workflow...
+✓ Workflow compiled
+✓ Simulation limits enabled
+  HTTP: req=120kb resp=250kb timeout=10s | ConfHTTP: req=125kb resp=500kb timeout=1m30s | Consensus obs=25kb | ChainWrite evm_report=50kb evm_gas=10000000 solana_report=265b solana_cu=300000 | WASM binary=100mb compressed=20mb
+  Binary hash: bfc7d22a5174e124fd81b9d318aff70238eb89f635aa7ebd4f53d72ebbb3aea1
+  Config hash: c249cc148f3dc4df46079e438f971765412416914c38002b14bb9f8a1f75ec76
+2026-10-13T23:48:47Z [SIMULATION] Simulator Initialized
+
+2026-10-13T23:48:47Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
+2026-10-13T23:48:51Z [USER LOG] [OBSERVE] risk feed: 0x5d59be=15, 0xe62be5=48, 0xe92168=21
+2026-10-13T23:48:54Z [USER LOG] [VERIFY] risk report written onchain: Strategy B 34->48 tx=0x4789f3eba6f41ebf39320651474d8be54bdb6e5b2c473abdbac4a1fa691997de
+2026-10-13T23:48:56Z [USER LOG] [DETECT] 0x09855cE865D094F6c2F2B5A13F64FC6F82b3B4C7: MANDATE AT RISK — Strategy B - LP Yield risk 48 exceeds mandate max 40
+2026-10-13T23:48:57Z [USER LOG] [DECIDE] deterministic: 0xE92168=4000, 0x5d59Be=3500 — Deterministic optimizer: highest-yield strategies within risk 40, 40% cap each, 25% reserve. Strategy A 40%, Strategy C 35%.
+2026-10-13T23:48:57Z [USER LOG] [CONSTRAIN] passed: portfolio risk 14/40, reserve 25%
+2026-10-13T23:49:00Z [USER LOG] [EXECUTE] rebalance written onchain tx=0x58557a0a88875b078d240543b88f6fc80d81d6a3df1aee997e328d8565e37d0b
+
+✓ Workflow Simulation Result:
+"verified Strategy B 34-\u003e48 | 0x09855c executed 0x58557a0a88875b078d240543b88f6fc80d81d6a3df1aee997e328d8565e37d0b"
+
+2026-10-13T23:49:00Z [SIMULATION] Execution finished signal received
+2026-10-13T23:49:00Z [SIMULATION] Skipping WorkflowEngineV2

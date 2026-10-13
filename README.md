@@ -26,6 +26,13 @@ KRIYA lets a user program a **financial mandate** (objective + hard constraints)
 | --- | --- |
 | Open $1,000 demo mandate | [`0x78b36c7e…8fa6`](https://testnet.monadexplorer.com/tx/0x78b36c7e962407dd964d52a683bea2c350039e6a800507e1938d072d51d38fa6) |
 | **Chainlink CRE** (`cre workflow simulate --target monad-settings --broadcast`): DETECT idle capital → DECIDE → CONSTRAIN → EXECUTE B 40 · A 35 · reserve 25, logged onchain as `source = CRE` | [`0x1aacc62c…4079`](https://testnet.monadexplorer.com/tx/0x1aacc62c5cc1f8e6a7449a271477406b4ffa383e475848a733129cc18a414079) |
+| Guardrail test: agent submits 60% into Strategy B (cap 40%) → **reverted onchain** with `ExposureExceeded(B, 6000, 4000)` | [`0xe8c15294…9466`](https://testnet.monadexplorer.com/tx/0xe8c15294f562bb813e5a439a74830733cfb73b42d86b1c3be144e59016549466) |
+| **Chainlink CRE** VERIFY: external risk feed says Strategy B 34 → 48; signed report → `onReport` → registry | [`0x4789f3eb…97de`](https://testnet.monadexplorer.com/tx/0x4789f3eba6f41ebf39320651474d8be54bdb6e5b2c473abdbac4a1fa691997de) |
+| **Chainlink CRE** EXECUTE (same run, 16 blocks / ~6 s later): mandate breach detected → exit B → A 40 · C 35 · reserve 25, portfolio risk 14/40 | [`0x58557a0a…7d0b`](https://testnet.monadexplorer.com/tx/0x58557a0a88875b078d240543b88f6fc80d81d6a3df1aee997e328d8565e37d0b) |
+
+Full CLI output of the second run: [`docs/cre/monad-simulation-broadcast-2.log`](docs/cre/monad-simulation-broadcast-2.log). Dashboard after the run:
+
+![KRIYA on Monad testnet](docs/monad-dashboard.jpg)
 
 ### Why Monad
 

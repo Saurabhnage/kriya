@@ -70,6 +70,32 @@ Transaction: [0xd4fc8b94…b59f](https://sepolia.etherscan.io/tx/0xd4fc8b94dba08
 
 Full, unedited output (except CLI update notices): [`docs/cre/simulation-readonly-2026-10-08.log`](cre/simulation-readonly-2026-10-08.log). Without `--broadcast` the simulator dry-runs writes (tx hash `0x00…00`). It shows the workflow evaluating two live mandates in one run: one at risk (Claude decides, the policy check passes) and one safe (no action).
 
+## 3. Broadcast simulation on Monad testnet — 2026-10-13 (writes onchain)
+
+The same workflow, unchanged, against the Monad testnet deployment (`contracts/deployments/10143.json`) with CRE CLI v1.38 (`monad-testnet` mock forwarder `0xB9F79d863261869B234c481D1f9A7af84AeAd192`):
+
+```bash
+cre workflow simulate kriya-workflow -T monad-settings --non-interactive --trigger-index 0 --broadcast
+```
+
+```text
+[USER LOG] [OBSERVE] risk feed: 0x5d59be=15, 0xe62be5=48, 0xe92168=21
+[USER LOG] [VERIFY] risk report written onchain: Strategy B 34->48 tx=0x4789f3eba6f41ebf39320651474d8be54bdb6e5b2c473abdbac4a1fa691997de
+[USER LOG] [DETECT] 0x09855cE865D094F6c2F2B5A13F64FC6F82b3B4C7: MANDATE AT RISK — Strategy B - LP Yield risk 48 exceeds mandate max 40
+[USER LOG] [DECIDE] deterministic: 0xE92168=4000, 0x5d59Be=3500 — Strategy A 40%, Strategy C 35%.
+[USER LOG] [CONSTRAIN] passed: portfolio risk 14/40, reserve 25%
+[USER LOG] [EXECUTE] rebalance written onchain tx=0x58557a0a88875b078d240543b88f6fc80d81d6a3df1aee997e328d8565e37d0b
+```
+
+Full output: [`docs/cre/monad-simulation-broadcast-2.log`](cre/monad-simulation-broadcast-2.log); the first Monad run (idle capital → first allocation, tx `0x1aacc62c…4079`) is in [`docs/cre/monad-simulation-broadcast.log`](cre/monad-simulation-broadcast.log).
+
+| CRE step | Transaction | Verified onchain |
+| --- | --- | --- |
+| VERIFY — Strategy B 34 → 48 | [0x4789f3eb…97de](https://testnet.monadexplorer.com/tx/0x4789f3eba6f41ebf39320651474d8be54bdb6e5b2c473abdbac4a1fa691997de) | status success, `to` = forwarder; `riskOf(B)` = 48 afterwards |
+| EXECUTE — A 40 · C 35 · reserve 25 | [0x58557a0a…7d0b](https://testnet.monadexplorer.com/tx/0x58557a0a88875b078d240543b88f6fc80d81d6a3df1aee997e328d8565e37d0b) | status success, `to` = forwarder, 16 blocks after VERIFY; positions A 400 / B 0 / C 350, idle 250 |
+
+The Monad app had no Claude key configured for this run, so DECIDE used the deterministic optimizer fallback; the onchain policy check is identical either way.
+
 ## Reproduce
 
 ```bash
