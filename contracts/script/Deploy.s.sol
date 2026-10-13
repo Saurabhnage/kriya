@@ -14,15 +14,22 @@ import {KriyaExecutor} from "../src/KriyaExecutor.sol";
 /// Env:
 ///   PRIVATE_KEY      deployer / protocol owner
 ///   AGENT_ADDRESS    KRIYA agent signer (fallback execution path)
-///   CRE_FORWARDER    Chainlink forwarder (defaults to the Sepolia MockKeystoneForwarder used by `cre workflow simulate --broadcast`)
+///   CRE_FORWARDER    Chainlink forwarder (defaults to the chain's MockKeystoneForwarder used by `cre workflow simulate --broadcast`)
 contract Deploy is Script {
     address constant SEPOLIA_MOCK_FORWARDER = 0x15fC6ae953E024d975e77382eEeC56A9101f9F88;
+    address constant MONAD_TESTNET_MOCK_FORWARDER = 0xB9F79d863261869B234c481D1f9A7af84AeAd192;
+
+    /// CRE simulation forwarder for this chain (changeable later via setForwarderAddress).
+    function defaultForwarder() internal view returns (address) {
+        if (block.chainid == 10143) return MONAD_TESTNET_MOCK_FORWARDER;
+        return SEPOLIA_MOCK_FORWARDER;
+    }
 
     function run() external {
         uint256 pk = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(pk);
         address agent = vm.envOr("AGENT_ADDRESS", deployer);
-        address forwarder = vm.envOr("CRE_FORWARDER", SEPOLIA_MOCK_FORWARDER);
+        address forwarder = vm.envOr("CRE_FORWARDER", defaultForwarder());
 
         vm.startBroadcast(pk);
 

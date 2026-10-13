@@ -200,3 +200,27 @@ The dashboard is a one-screen **mission control**: mandate and allocation on the
 - User override: pause the mandate (`setActive(false)`), `emergencyExit()`, and `withdraw()`. `emergencyExit()` also pauses the mandate, so the agent cannot redeploy capital the user just pulled out (the live Sepolia contracts predate this; the dashboard pauses before exiting there). Owner-level emergency pause: `KriyaExecutor.setPaused`.
 - The gas- and credit-spending API routes are rate limited across instances (Redis), so a public demo URL cannot drain the agent wallet.
 - Limits enforced: per-strategy exposure caps, per-strategy and portfolio risk caps, minimum liquidity reserve, drawdown floor vs high-water mark, strategy allowlist, auto-rebalance opt-in.
+
+## Build timeline & originality
+
+KRIYA was built from scratch during the Monad Metropolis Hackathon window: the first commit is 2026-10-06 and the full history is in this repository. The same codebase was also entered in TOKEN2049 Origins (Ethereum Sepolia). The Monad deployment, the Monad build of the app and the Monad documentation were added for Metropolis.
+
+## AI disclosure
+
+This project was built with an AI coding assistant (Claude Code, Anthropic) for code generation, testing, debugging and documentation, under the author's direction and review. The product itself also uses an LLM at runtime: Claude (`claude-sonnet-5-5`, via the Anthropic API) proposes allocations, which are always re-validated by the policy engine, the CRE workflow and the executor contract.
+
+## Third-party code & attribution
+
+| Component | Source | License |
+| --- | --- | --- |
+| `contracts/src/cre/ReceiverTemplate.sol`, `IReceiver.sol` | Adapted from Chainlink's CRE consumer-contract template ([docs](https://docs.chain.link/cre)) | MIT |
+| OpenZeppelin Contracts (`ERC20`, `Ownable`, `SafeERC20`, `ReentrancyGuard`) | [OpenZeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts) | MIT |
+| forge-std | [Foundry](https://github.com/foundry-rs/forge-std) | MIT / Apache-2.0 |
+| `@chainlink/cre-sdk` | [Chainlink](https://www.npmjs.com/package/@chainlink/cre-sdk) | see package |
+| Next.js, React, viem, wagmi, TanStack Query, Tailwind CSS, zod | npm | MIT |
+| `@anthropic-ai/sdk` | [Anthropic](https://github.com/anthropics/anthropic-sdk-typescript) | MIT |
+| pptxgenjs (deck generator) | npm | MIT |
+
+## License
+
+[MIT](LICENSE)

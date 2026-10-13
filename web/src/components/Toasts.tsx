@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { friendlyError } from "@/lib/errors";
+import { chain, FAUCET, GAS_SYMBOL } from "@/lib/config";
 
 type Toast = { id: number; tone: "success" | "error" | "info"; message: string; link?: { label: string; href: string } };
 type ToastApi = { success: (m: string) => void; info: (m: string) => void; error: (err: unknown) => void };
@@ -23,7 +24,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     () => ({
       success: (message) => push({ tone: "success", message }),
       info: (message) => push({ tone: "info", message }),
-      error: (err) => push({ tone: "error", ...friendlyError(err) }),
+      error: (err) => push({ tone: "error", ...friendlyError(err, { symbol: GAS_SYMBOL, network: chain.name, faucet: FAUCET }) }),
     }),
     [push],
   );
