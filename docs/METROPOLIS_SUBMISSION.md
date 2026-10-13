@@ -26,7 +26,7 @@ The thesis is that AI proposes, rules constrain, verifiable infrastructure verif
 
 ## How it uses Monad
 - All six contracts (vault, mandate, executor/CRE receiver, strategy registry, test USDC and three strategy vaults) are deployed on Monad testnet (chain 10143). The full story has run there end to end, and every step is onchain (tx list below).
-- **Speed matters for an autonomous risk loop.** In our run the verified risk spike and the rebalance that answered it landed 16 blocks (~6 s) apart, so the mandate spent almost no time outside its limits.
+- **Speed matters for an autonomous risk loop.** In our run the verified risk spike and the rebalance that answered it landed 16 blocks (~5 s by block timestamps) apart, so the mandate spent almost no time outside its limits.
 - **Cheap execution makes onchain enforcement viable.** Each allocation re-checks exposure, per-strategy risk, portfolio risk, reserve and drawdown in Solidity. On Monad that costs fractions of a cent, which lets small mandates rebalance often.
 - **EVM compatibility.** The same Solidity, 23 Foundry tests (including fuzz properties) and the same Chainlink CRE workflow run unchanged. The CRE CLI targets `monad-testnet` natively.
 - **Built for the RPC.** Monad's public RPC caps `eth_getLogs` at 100 blocks, so the app keeps an incremental event-log index (cursor plus stored logs in Redis). After a one-time backfill the dashboard has full history and each poll reads only new blocks. It can also plug into Envio HyperRPC via `LOGS_RPC_URL`.
