@@ -1,6 +1,6 @@
 import "server-only";
 import { parseAbiItem, type Address, type Log } from "viem";
-import { publicClient } from "./chain";
+import { LOG_RANGE, logsClient, publicClient } from "./chain";
 import { deployment } from "../config";
 import {
   KriyaExecutorAbi,
@@ -126,13 +126,15 @@ const EVENTS = {
   ),
 };
 
-const CHUNK = 9_000n;
+const CHUNK = LOG_RANGE.chunk;
 // keyed by block hash: block numbers repeat across chain resets and reorgs, hashes do not
 const blockTimes = new Map<string, number>();
 
 async function logsInChunks<T>(fetcher: (from: bigint, to: bigint) => Promise<T[]>, latest: bigint): Promise<T[]> {
   const out: T[] = [];
-  const start = BigInt(deployment.deployBlock);
+  const deployed = BigInt(deployment.deployBlock);
+  // Range-capped RPC without an indexer: only scan a recent window so a request stays bounded.
+  const start = LOG_RANGE.lookback !== null && latest - LOG_RANGE.lookback > deployed ? latest - LOG_RANGE.lookback : deployed;
   for (let from = start; from <= latest; from += CHUNK + 1n) {
     const to = from + CHUNK > latest ? latest : from + CHUNK;
     out.push(...(await fetcher(from, to)));
@@ -149,7 +151,7 @@ export async function readActivity(user: Address, strategies: StrategyView[], la
   const get = (address: Address, event: (typeof EVENTS)[keyof typeof EVENTS], args?: Record<string, unknown>) =>
     logsInChunks(
       (fromBlock, toBlock) =>
-        publicClient.getLogs({ address, event, args, fromBlock, toBlock } as Parameters<typeof publicClient.getLogs>[0]),
+        logsClient.getLogs({ address, event, args, fromBlock, toBlock } as Parameters<typeof logsClient.getLogs>[0]),
       latest,
     );
 
