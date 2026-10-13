@@ -1,5 +1,5 @@
 import "server-only";
-import { parseAbiItem, type Address, type Log } from "viem";
+import { parseAbiItem, parseEventLogs, type Address, type Hex, type Log } from "viem";
 import { LOG_RANGE, logsClient, publicClient } from "./chain";
 import { deployment } from "../config";
 import {
@@ -10,7 +10,7 @@ import {
   MockUSDCAbi,
 } from "../generated/abis";
 import type { MandateParams, StrategyView } from "../policy";
-import { readJournal, type JournalEntry } from "./store";
+import { getJson, readJournal, setJson, type JournalEntry } from "./store";
 import type { RiskPoint } from "./lastRun";
 
 export type Snapshot = {
@@ -142,18 +142,89 @@ async function logsInChunks<T>(fetcher: (from: bigint, to: bigint) => Promise<T[
   return out;
 }
 
+// ------------------------------------------------------------------ incremental log index (range-capped RPCs)
+// Monad's public RPC caps eth_getLogs at 100 blocks. Instead of rescanning from the deploy block on every
+// poll, keep every protocol log in the store with a cursor; each request only reads blocks past the cursor.
+
+type StoredLog = { address: Address; topics: Hex[]; data: Hex; blockNumber: string; blockHash: Hex; transactionHash: Hex; logIndex: number };
+type LogIndex = { cursor: string; logs: StoredLog[] };
+
+const INDEX_NAME = "logs-index-v1";
+const MAX_CHUNKS_PER_REQUEST = 400;
+const PARALLEL = 4;
+
+async function scanRange(from: bigint, to: bigint): Promise<StoredLog[]> {
+  const ranges: [bigint, bigint][] = [];
+  for (let f = from; f <= to; f += CHUNK + 1n) ranges.push([f, f + CHUNK > to ? to : f + CHUNK]);
+  const out: StoredLog[] = [];
+  for (let i = 0; i < ranges.length; i += PARALLEL) {
+    const batch = await Promise.all(
+      ranges.slice(i, i + PARALLEL).map(([fromBlock, toBlock]) =>
+        logsClient.getLogs({ address: [deployment.vault, deployment.mandate, deployment.registry, deployment.executor], fromBlock, toBlock }),
+      ),
+    );
+    for (const logs of batch)
+      for (const l of logs)
+        out.push({
+          address: l.address,
+          topics: l.topics as Hex[],
+          data: l.data,
+          blockNumber: l.blockNumber!.toString(),
+          blockHash: l.blockHash!,
+          transactionHash: l.transactionHash!,
+          logIndex: l.logIndex!,
+        });
+  }
+  return out;
+}
+
+async function indexedLogs(latest: bigint): Promise<Log[]> {
+  const deployed = BigInt(deployment.deployBlock);
+  const index = (await getJson<LogIndex>(INDEX_NAME)) ?? { cursor: (deployed - 1n).toString(), logs: [] };
+  const cursor = BigInt(index.cursor);
+  const target = (() => {
+    const max = cursor + BigInt(MAX_CHUNKS_PER_REQUEST) * (CHUNK + 1n);
+    return max < latest ? max : latest;
+  })();
+  const fresh = target > cursor ? await scanRange(cursor + 1n, target) : [];
+  // still backfilling: also read the recent window live so new events show up immediately
+  const live = target < latest && LOG_RANGE.lookback !== null ? await scanRange(latest - LOG_RANGE.lookback > target ? latest - LOG_RANGE.lookback : target + 1n, latest) : [];
+  if (fresh.length || target > cursor) {
+    const seen = new Set(index.logs.map((l) => `${l.transactionHash}-${l.logIndex}`));
+    const merged = [...index.logs, ...fresh.filter((l) => !seen.has(`${l.transactionHash}-${l.logIndex}`))];
+    await setJson(INDEX_NAME, { cursor: target.toString(), logs: merged } satisfies LogIndex);
+    index.logs = merged;
+  }
+  const seen = new Set(index.logs.map((l) => `${l.transactionHash}-${l.logIndex}`));
+  return [...index.logs, ...live.filter((l) => !seen.has(`${l.transactionHash}-${l.logIndex}`))].map(
+    (l) =>
+      ({
+        ...l,
+        blockNumber: BigInt(l.blockNumber),
+        transactionIndex: 0,
+        removed: false,
+      }) as unknown as Log,
+  );
+}
+
 const fmtUsdc = (v: bigint) => (Number(v) / 1e6).toLocaleString("en-US", { maximumFractionDigits: 2 });
 
 export type ActivityResult = { items: ActivityItem[]; riskHistory: RiskPoint[]; journal: JournalEntry[] };
 
 export async function readActivity(user: Address, strategies: StrategyView[], latest: bigint): Promise<ActivityResult> {
   const name = (a: string) => strategies.find((s) => s.address.toLowerCase() === a.toLowerCase())?.name ?? a.slice(0, 8);
-  const get = (address: Address, event: (typeof EVENTS)[keyof typeof EVENTS], args?: Record<string, unknown>) =>
-    logsInChunks(
+  const all = CHUNK < 1_000n ? await indexedLogs(latest) : null;
+  const get = async (address: Address, event: (typeof EVENTS)[keyof typeof EVENTS], args?: Record<string, unknown>) => {
+    if (all) {
+      const mine = all.filter((l) => l.address.toLowerCase() === address.toLowerCase());
+      return parseEventLogs({ abi: [event], logs: mine, args } as Parameters<typeof parseEventLogs>[0]);
+    }
+    return logsInChunks(
       (fromBlock, toBlock) =>
         logsClient.getLogs({ address, event, args, fromBlock, toBlock } as Parameters<typeof logsClient.getLogs>[0]),
       latest,
     );
+  };
 
   // sequential on purpose: public RPCs rate-limit parallel eth_getLogs bursts
   const dep = await get(deployment.vault, EVENTS.deposited, { user });

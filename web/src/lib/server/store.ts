@@ -152,3 +152,18 @@ export async function rateLimit(name: string, limit: number, windowSec: number):
   w.count += 1;
   return { ok: w.count <= limit, retryAfter: Math.ceil((w.resetAt - now) / 1000) };
 }
+
+// ------------------------------------------------------------------ generic JSON documents
+
+export async function getJson<T>(name: string): Promise<T | null> {
+  if (redisEnabled) {
+    const raw = await redis<string | null>("GET", ns(name));
+    return raw ? (JSON.parse(raw) as T) : null;
+  }
+  return loadLocal<T | null>(`${name}-${deployment.chainId}`, () => null);
+}
+
+export async function setJson(name: string, value: unknown): Promise<void> {
+  if (redisEnabled) await redis("SET", ns(name), JSON.stringify(value));
+  else saveLocal(`${name}-${deployment.chainId}`, value);
+}
