@@ -43,6 +43,10 @@ KRIYA is an *autonomous* loop: every run can verify risk, rebalance several posi
 - **Full EVM compatibility.** The same Solidity, Foundry tests and Chainlink CRE workflow run unchanged; the CRE CLI supports `monad-testnet` natively.
 - **Parallel execution.** Per-user mandates and vault positions are independent state, which suits Monad's parallel execution as the number of mandates grows.
 
+### Roadmap
+
+- **Cross-chain mandates via Chainlink CCIP.** One mandate spanning several chains (for example Monad and Ethereum): CRE decides the allocation, CCIP moves the capital and carries the execution instruction, and the mandate is enforced onchain on each chain before funds move.
+
 ## Live on Ethereum Sepolia
 
 **App:** https://kriya-beta.vercel.app (any mandate can be viewed read-only: [demo mandate](https://kriya-beta.vercel.app/?view=0x09855cE865D094F6c2F2B5A13F64FC6F82b3B4C7))

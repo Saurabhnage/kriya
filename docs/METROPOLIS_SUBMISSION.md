@@ -59,6 +59,9 @@ The thesis is that AI proposes, rules constrain, verifiable infrastructure verif
 | CRE verify risk B 34 → 48 | 0x4789f3eba6f41ebf39320651474d8be54bdb6e5b2c473abdbac4a1fa691997de |
 | CRE rebalance out of B | 0x58557a0a88875b078d240543b88f6fc80d81d6a3df1aee997e328d8565e37d0b |
 
+## Roadmap
+Next: cross-chain mandates via Chainlink CCIP. One mandate spans several chains (for example Monad and Ethereum): CRE decides the allocation, CCIP moves the capital and carries the execution instruction, and each chain enforces the mandate onchain before funds move.
+
 ## Tech stack
 Solidity 0.8.26 · Foundry · OpenZeppelin · Chainlink CRE TypeScript SDK · Next.js 16 · React 19 · wagmi/viem · Anthropic Claude API · Upstash Redis · Vercel · Monad testnet
 
