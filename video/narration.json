@@ -1,0 +1,11 @@
+[
+ {"id":"hook","text":"Every day, people put money into DeFi... and then spend hours watching it. Checking risk. Signing transactions. Hoping nothing breaks while they sleep."},
+ {"id":"problem","text":"And handing your keys to an AI agent? Well, that's a whole different kind of risk."},
+ {"id":"intro","text":"Meet KRIYA. An autonomous capital protocol, live on Monad. Stop programming transactions. Start programming financial objectives."},
+ {"id":"mandate","text":"You set the goal, say, maximise risk-adjusted yield, and the limits that matter to you. Maximum risk. Maximum exposure. A minimum reserve. That mandate lives inside a smart contract."},
+ {"id":"loop","text":"Then KRIYA takes over. Chainlink CRE watches real-world risk, and verifies it onchain. Claude decides the best allocation. A policy engine double-checks it. And CRE executes it, end to end. Nobody has to click a button."},
+ {"id":"proof","text":"So when one strategy's risk jumped from thirty-four to forty-eight, KRIYA verified it, and moved the money out, in just five seconds, on Monad."},
+ {"id":"guard","text":"And if the AI ever gets it wrong? The contract simply says no. An unsafe allocation just reverts. AI proposes. Contracts enforce."},
+ {"id":"monad","text":"Monad's fast, low-cost blocks are what make this practical. Every rule, checked onchain, every single time."},
+ {"id":"close","text":"KRIYA. Your capital, on autopilot, within your rules. Live now, on Monad testnet."}
+]

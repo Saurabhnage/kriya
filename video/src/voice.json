@@ -1,0 +1,216 @@
+[
+ {
+  "id": "hook",
+  "duration": 13.32,
+  "subs": [
+   {
+    "start": 0.1,
+    "end": 6.0066325,
+    "text": "Every day, people put money into DeFi... and then spend hours watching it."
+   },
+   {
+    "start": 5.9566325,
+    "end": 7.8188773,
+    "text": "Checking risk."
+   },
+   {
+    "start": 7.8188773,
+    "end": 10.1275507,
+    "text": "Signing transactions."
+   },
+   {
+    "start": 10.1275508,
+    "end": 13.2653058,
+    "text": "Hoping nothing breaks while they sleep."
+   }
+  ]
+ },
+ {
+  "id": "problem",
+  "duration": 7.176,
+  "subs": [
+   {
+    "start": 0.1,
+    "end": 3.3790815,
+    "text": "And handing your keys to an AI agent?"
+   },
+   {
+    "start": 3.3290815,
+    "end": 7.1045916,
+    "text": "Well, that's a whole different kind of risk."
+   }
+  ]
+ },
+ {
+  "id": "intro",
+  "duration": 12.552,
+  "subs": [
+   {
+    "start": 0.1,
+    "end": 1.9249999,
+    "text": "Meet KRIYA."
+   },
+   {
+    "start": 1.8749999,
+    "end": 6.0204079,
+    "text": "An autonomous capital protocol, live on Monad."
+   },
+   {
+    "start": 6.020408,
+    "end": 8.9413263,
+    "text": "Stop programming transactions."
+   },
+   {
+    "start": 8.9413263,
+    "end": 12.4999997,
+    "text": "Start programming financial objectives."
+   }
+  ]
+ },
+ {
+  "id": "mandate",
+  "duration": 17.352,
+  "subs": [
+   {
+    "start": 0.1,
+    "end": 6.9377549,
+    "text": "You set the goal, say, maximise risk-adjusted yield, and the limits that matter to you."
+   },
+   {
+    "start": 6.8877549,
+    "end": 8.9540813,
+    "text": "Maximum risk."
+   },
+   {
+    "start": 8.9540814,
+    "end": 11.3137752,
+    "text": "Maximum exposure."
+   },
+   {
+    "start": 11.3137752,
+    "end": 13.431122,
+    "text": "A minimum reserve."
+   },
+   {
+    "start": 13.4311221,
+    "end": 17.2831628,
+    "text": "That mandate lives inside a smart contract."
+   }
+  ]
+ },
+ {
+  "id": "loop",
+  "duration": 20.4,
+  "subs": [
+   {
+    "start": 0.1,
+    "end": 2.6010203,
+    "text": "Then KRIYA takes over."
+   },
+   {
+    "start": 2.5510203,
+    "end": 7.8571426,
+    "text": "Chainlink CRE watches real-world risk, and verifies it onchain."
+   },
+   {
+    "start": 7.8571427,
+    "end": 10.9438773,
+    "text": "Claude decides the best allocation."
+   },
+   {
+    "start": 10.9438773,
+    "end": 13.915816,
+    "text": "A policy engine double-checks it."
+   },
+   {
+    "start": 13.915816,
+    "end": 17.6275506,
+    "text": "And CRE executes it, end to end."
+   },
+   {
+    "start": 17.6275506,
+    "end": 20.3443872,
+    "text": "Nobody has to click a button."
+   }
+  ]
+ },
+ {
+  "id": "proof",
+  "duration": 10.512,
+  "subs": [
+   {
+    "start": 0.1,
+    "end": 10.4964283,
+    "text": "So when one strategy's risk jumped from thirty-four to forty-eight, KRIYA verified it, and moved the money out, in just five seconds, on Monad."
+   }
+  ]
+ },
+ {
+  "id": "guard",
+  "duration": 14.304,
+  "subs": [
+   {
+    "start": 0.1,
+    "end": 3.315306,
+    "text": "And if the AI ever gets it wrong?"
+   },
+   {
+    "start": 3.265306,
+    "end": 6.1734692,
+    "text": "The contract simply says no."
+   },
+   {
+    "start": 6.1734692,
+    "end": 9.668367,
+    "text": "An unsafe allocation just reverts."
+   },
+   {
+    "start": 9.6683671,
+    "end": 11.9642854,
+    "text": "AI proposes."
+   },
+   {
+    "start": 11.9642854,
+    "end": 14.2346935,
+    "text": "Contracts enforce."
+   }
+  ]
+ },
+ {
+  "id": "monad",
+  "duration": 9.096,
+  "subs": [
+   {
+    "start": 0.1,
+    "end": 4.7183672,
+    "text": "Monad's fast, low-cost blocks are what make this practical."
+   },
+   {
+    "start": 4.6683672,
+    "end": 9.030612,
+    "text": "Every rule, checked onchain, every single time."
+   }
+  ]
+ },
+ {
+  "id": "close",
+  "duration": 9.216,
+  "subs": [
+   {
+    "start": 0.1,
+    "end": 1.555102,
+    "text": "KRIYA."
+   },
+   {
+    "start": 1.505102,
+    "end": 5.8673468,
+    "text": "Your capital, on autopilot, within your rules."
+   },
+   {
+    "start": 5.8673468,
+    "end": 9.158163,
+    "text": "Live now, on Monad testnet."
+   }
+  ]
+ }
+]

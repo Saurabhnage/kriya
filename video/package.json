@@ -1,0 +1,19 @@
+{
+  "name": "kriya-product-video",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "voice": "python tts.py",
+    "render": "remotion render KriyaProduct out/KRIYA-product-video.mp4 --codec=h264 --crf=18 --audio-bitrate=192k"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.535",
+    "@remotion/google-fonts": "^4.0.535",
+    "@remotion/transitions": "^4.0.535",
+    "@types/react": "^19.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remotion": "^4.0.535",
+    "typescript": "^7.0.2"
+  }
+}
