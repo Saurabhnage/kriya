@@ -1,0 +1,26 @@
+Initializing...
+Loading settings...
+Checking RPC connectivity...
+! Some RPCs in settings are not functioning properly, please check: RPC health check failed:            
+[monad-testnet] failed RPC health check: Post "https://testnet-rpc.monad.xyz": context deadline exceeded
+Compiling workflow...
+✓ Workflow compiled
+✓ Simulation limits enabled
+  HTTP: req=120kb resp=250kb timeout=10s | ConfHTTP: req=125kb resp=500kb timeout=1m30s | Consensus obs=25kb | ChainWrite evm_report=50kb evm_gas=10000000 solana_report=265b solana_cu=300000 | WASM binary=100mb compressed=20mb
+  Binary hash: bfc7d22a5174e124fd81b9d318aff70238eb89f635aa7ebd4f53d72ebbb3aea1
+  Config hash: c249cc148f3dc4df46079e438f971765412416914c38002b14bb9f8a1f75ec76
+2026-10-13T23:22:28Z [SIMULATION] Simulator Initialized
+
+2026-10-13T23:22:28Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
+2026-10-13T23:22:33Z [USER LOG] [OBSERVE] risk feed: 0x5d59be=15, 0xe62be5=34, 0xe92168=21
+2026-10-13T23:22:34Z [USER LOG] [VERIFY] onchain risk scores match verified feed
+2026-10-13T23:22:38Z [USER LOG] [DETECT] 0x09855cE865D094F6c2F2B5A13F64FC6F82b3B4C7: idle capital awaiting allocation
+2026-10-13T23:22:40Z [USER LOG] [DECIDE] deterministic: 0xe62bE5=4000, 0xE92168=3500 — Deterministic optimizer: highest-yield strategies within risk 40, 40% cap each, 25% reserve. Strategy B 40%, Strategy A 35%.
+2026-10-13T23:22:40Z [USER LOG] [CONSTRAIN] passed: portfolio risk 21/40, reserve 25%
+2026-10-13T23:22:44Z [USER LOG] [EXECUTE] rebalance written onchain tx=0x1aacc62c5cc1f8e6a7449a271477406b4ffa383e475848a733129cc18a414079
+
+✓ Workflow Simulation Result:
+"0x09855c executed 0x1aacc62c5cc1f8e6a7449a271477406b4ffa383e475848a733129cc18a414079"
+
+2026-10-13T23:22:44Z [SIMULATION] Execution finished signal received
+2026-10-13T23:22:44Z [SIMULATION] Skipping WorkflowEngineV2

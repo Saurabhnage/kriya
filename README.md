@@ -8,6 +8,34 @@ KRIYA lets a user program a **financial mandate** (objective + hard constraints)
 
 ---
 
+## Live on Monad testnet (Metropolis)
+
+**App:** https://kriya-monad.vercel.app · chain id 10143 · [CRE simulation log](docs/cre/monad-simulation-broadcast.log)
+
+| Contract | Address |
+| --- | --- |
+| KriyaExecutor (Chainlink CRE receiver) | [`0x9c5f1A2326Fa1C16e04Ecf32C60091150161656A`](https://testnet.monadexplorer.com/address/0x9c5f1A2326Fa1C16e04Ecf32C60091150161656A) |
+| KriyaVault | [`0xd167B393646E39A01bB14A4e0C53A96940C249ee`](https://testnet.monadexplorer.com/address/0xd167B393646E39A01bB14A4e0C53A96940C249ee) |
+| KriyaMandate | [`0x97FD1b5af7622377744C8c2F44F4fF3A04a52073`](https://testnet.monadexplorer.com/address/0x97FD1b5af7622377744C8c2F44F4fF3A04a52073) |
+| KriyaStrategyRegistry | [`0xadAE9Abccf4fE599405C39bC19A4686566dEd7b6`](https://testnet.monadexplorer.com/address/0xadAE9Abccf4fE599405C39bC19A4686566dEd7b6) |
+| Test USDC | [`0x17Be8BA91d0f331B198eFe73Dd272f9C492d471D`](https://testnet.monadexplorer.com/address/0x17Be8BA91d0f331B198eFe73Dd272f9C492d471D) |
+| Strategy A / B / C | [`0xE92168d45CAf4ec291ce78E727e90015D50e2032`](https://testnet.monadexplorer.com/address/0xE92168d45CAf4ec291ce78E727e90015D50e2032) / [`0xe62bE538B87fb492FCf977b1Ddf7ee7202148006`](https://testnet.monadexplorer.com/address/0xe62bE538B87fb492FCf977b1Ddf7ee7202148006) / [`0x5d59Be06B7518EF3438194226826487d35a5f6fd`](https://testnet.monadexplorer.com/address/0x5d59Be06B7518EF3438194226826487d35a5f6fd) |
+| Chainlink CRE MockKeystoneForwarder (monad-testnet) | [`0xB9F79d863261869B234c481D1f9A7af84AeAd192`](https://testnet.monadexplorer.com/address/0xB9F79d863261869B234c481D1f9A7af84AeAd192) |
+
+| Step | Tx |
+| --- | --- |
+| Open $1,000 demo mandate | [`0x78b36c7e…8fa6`](https://testnet.monadexplorer.com/tx/0x78b36c7e962407dd964d52a683bea2c350039e6a800507e1938d072d51d38fa6) |
+| **Chainlink CRE** (`cre workflow simulate --target monad-settings --broadcast`): DETECT idle capital → DECIDE → CONSTRAIN → EXECUTE B 40 · A 35 · reserve 25, logged onchain as `source = CRE` | [`0x1aacc62c…4079`](https://testnet.monadexplorer.com/tx/0x1aacc62c5cc1f8e6a7449a271477406b4ffa383e475848a733129cc18a414079) |
+
+### Why Monad
+
+KRIYA is an *autonomous* loop: every run can verify risk, rebalance several positions and log its decision onchain. That only works as a continuous, per-user service when settlement is fast and cheap.
+
+- **400 ms blocks, ~800 ms finality.** A verified risk change and the rebalance that answers it land seconds apart, so a mandate spends almost no time outside its limits. The dashboard streams each step as it is confirmed.
+- **Cheap execution.** Constraint checks run fully onchain on every allocation (exposure, per-strategy and portfolio risk, reserve, drawdown). On Monad that costs fractions of a cent, so rebalancing small mandates often is viable.
+- **Full EVM compatibility.** The same Solidity, Foundry tests and Chainlink CRE workflow run unchanged; the CRE CLI supports `monad-testnet` natively.
+- **Parallel execution.** Per-user mandates and vault positions are independent state, which suits Monad's parallel execution as the number of mandates grows.
+
 ## Live on Ethereum Sepolia
 
 **App:** https://kriya-beta.vercel.app (any mandate can be viewed read-only: [demo mandate](https://kriya-beta.vercel.app/?view=0x09855cE865D094F6c2F2B5A13F64FC6F82b3B4C7))
