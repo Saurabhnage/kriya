@@ -1,0 +1,6 @@
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\wish-0.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\wish-0-sil.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\wish-1.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\wish-1-sil.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\wish-2.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\wish-2-sil.wav'

@@ -1,0 +1,4 @@
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\backstory-0.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\backstory-0-sil.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\backstory-1.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\backstory-1-sil.wav'

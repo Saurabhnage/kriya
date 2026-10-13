@@ -1,0 +1,6 @@
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\close-0.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\close-0-sil.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\close-1.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\close-1-sil.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\close-2.wav'
+file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\close-2-sil.wav'

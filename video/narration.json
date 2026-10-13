@@ -1,11 +1,69 @@
 [
- {"id":"hook","text":"Every day, people put money into DeFi... and then spend hours watching it. Checking risk. Signing transactions. Hoping nothing breaks while they sleep."},
- {"id":"problem","text":"And handing your keys to an AI agent? Well, that's a whole different kind of risk."},
- {"id":"intro","text":"Meet KRIYA. An autonomous capital protocol, live on Monad. Stop programming transactions. Start programming financial objectives."},
- {"id":"mandate","text":"You set the goal, say, maximise risk-adjusted yield, and the limits that matter to you. Maximum risk. Maximum exposure. A minimum reserve. That mandate lives inside a smart contract."},
- {"id":"loop","text":"Then KRIYA takes over. Chainlink CRE watches real-world risk, and verifies it onchain. Claude decides the best allocation. A policy engine double-checks it. And CRE executes it, end to end. Nobody has to click a button."},
- {"id":"proof","text":"So when one strategy's risk jumped from thirty-four to forty-eight, KRIYA verified it, and moved the money out, in just five seconds, on Monad."},
- {"id":"guard","text":"And if the AI ever gets it wrong? The contract simply says no. An unsafe allocation just reverts. AI proposes. Contracts enforce."},
- {"id":"monad","text":"Monad's fast, low-cost blocks are what make this practical. Every rule, checked onchain, every single time."},
- {"id":"close","text":"KRIYA. Your capital, on autopilot, within your rules. Live now, on Monad testnet."}
+  { "id": "night", "lines": [
+    { "t": "It's 2:47 in the morning, in Bengaluru.", "rate": "-8%", "pitch": "-2Hz", "pause": 0.55 },
+    { "t": "Arjun is awake again.", "rate": "-6%", "pause": 0.45 },
+    { "t": "Not because of work... because of his phone.", "rate": "-5%", "pause": 0.3 }
+  ]},
+  { "id": "backstory", "lines": [
+    { "t": "A couple of years ago, Arjun moved some of his savings into DeFi.", "rate": "-2%", "pause": 0.4 },
+    { "t": "Stablecoins, lending pools... yields that actually beat his bank.", "rate": "+0%", "pitch": "+2Hz", "pause": 0.3 }
+  ]},
+  { "id": "secondjob", "lines": [
+    { "t": "But that yield came with a second job.", "rate": "-4%", "pause": 0.5 },
+    { "t": "Dashboards before stand-up.", "rate": "+2%", "pause": 0.3 },
+    { "t": "Risk updates at lunch.", "rate": "+2%", "pause": 0.3 },
+    { "t": "Signing transactions at midnight.", "rate": "+0%", "pause": 0.65 },
+    { "t": "And the one night he didn't check... a pool he was in turned risky.", "rate": "-7%", "pitch": "-2Hz", "pause": 0.35 },
+    { "t": "By morning, he'd lost a chunk of it.", "rate": "-8%", "pitch": "-3Hz", "pause": 0.3 }
+  ]},
+  { "id": "alternatives", "lines": [
+    { "t": "Bots and AI agents? Every one of them wanted his keys. Full control.", "rate": "-2%", "pause": 0.5 },
+    { "t": "And if the AI got it wrong at three in the morning... who would stop it?", "rate": "-5%", "pause": 0.3 }
+  ]},
+  { "id": "wish", "lines": [
+    { "t": "All Arjun really wanted was to tell his money what he wants...", "rate": "-6%", "pause": 0.3 },
+    { "t": "and the limits it must never cross.", "rate": "-6%", "pause": 0.5 },
+    { "t": "And then, just... sleep.", "rate": "-10%", "pitch": "-2Hz", "pause": 0.3 }
+  ]},
+  { "id": "kriya", "lines": [
+    { "t": "That's exactly what KRIYA does.", "rate": "-2%", "pitch": "+2Hz", "pause": 0.45 },
+    { "t": "No more programming transactions. Arjun programs an objective.", "rate": "-3%", "pause": 0.3 }
+  ]},
+  { "id": "mandate", "lines": [
+    { "t": "Maximise yield.", "rate": "-2%", "pause": 0.35 },
+    { "t": "Risk, never above forty.", "rate": "-3%", "pause": 0.35 },
+    { "t": "No more than forty percent in one place.", "rate": "-2%", "pause": 0.35 },
+    { "t": "Always keep a quarter in reserve.", "rate": "-2%", "pause": 0.55 },
+    { "t": "And that mandate lives in a smart contract, on Monad. Not in a promise.", "rate": "-4%", "pause": 0.3 }
+  ]},
+  { "id": "incident", "lines": [
+    { "t": "Then, one night, it happened again.", "rate": "-7%", "pitch": "-2Hz", "pause": 0.45 },
+    { "t": "Strategy B's risk jumped from thirty-four to forty-eight.", "rate": "-2%", "pause": 0.4 },
+    { "t": "This time, Arjun was fast asleep.", "rate": "-8%", "pause": 0.6 },
+    { "t": "Chainlink CRE caught it, and verified it onchain.", "rate": "+0%", "pause": 0.3 },
+    { "t": "KRIYA worked out where the money should go.", "rate": "+0%", "pause": 0.3 },
+    { "t": "The policy engine checked it.", "rate": "+0%", "pause": 0.45 },
+    { "t": "And in about five seconds, on Monad... his money was out of B, and safe.", "rate": "-5%", "pause": 0.3 }
+  ]},
+  { "id": "guard", "lines": [
+    { "t": "And when an AI proposal tried to cross the line, the contract simply said no.", "rate": "-3%", "pause": 0.55 },
+    { "t": "AI proposes. Contracts enforce.", "rate": "-8%", "pause": 0.3 }
+  ]},
+  { "id": "morning", "lines": [
+    { "t": "Next morning, Arjun opens KRIYA, with his chai.", "rate": "-3%", "pitch": "+2Hz", "pause": 0.45 },
+    { "t": "What changed, what KRIYA did, and why... every step, right there, onchain.", "rate": "-3%", "pause": 0.3 }
+  ]},
+  { "id": "whofor", "lines": [
+    { "t": "KRIYA is for everyone like Arjun.", "rate": "-3%", "pause": 0.4 },
+    { "t": "For DAO treasuries that can't afford one bad night.", "rate": "-2%", "pause": 0.35 },
+    { "t": "And for teams that need rules... not trust.", "rate": "-5%", "pause": 0.3 }
+  ]},
+  { "id": "monad", "lines": [
+    { "t": "Built on Monad, where blocks are fast and cheap enough to check every rule, every single time.", "rate": "-2%", "pause": 0.3 }
+  ]},
+  { "id": "close", "lines": [
+    { "t": "KRIYA.", "rate": "-8%", "pause": 0.5 },
+    { "t": "Your capital, on autopilot. Within your rules.", "rate": "-5%", "pause": 0.45 },
+    { "t": "Live now, on Monad testnet.", "rate": "-3%", "pause": 0.3 }
+  ]}
 ]
