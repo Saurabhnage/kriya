@@ -150,19 +150,31 @@ type StoredLog = { address: Address; topics: Hex[]; data: Hex; blockNumber: stri
 type LogIndex = { cursor: string; logs: StoredLog[] };
 
 const INDEX_NAME = "logs-index-v1";
-const MAX_CHUNKS_PER_REQUEST = 400;
-const PARALLEL = 4;
+const MAX_CHUNKS_PER_REQUEST = 200;
+const PARALLEL = 3;
+const SCAN_BUDGET_MS = 8_000;
 
-async function scanRange(from: bigint, to: bigint): Promise<StoredLog[]> {
+// Reads [from, to] in capped chunks. Stops early on an RPC error (public RPCs rate-limit bursts) or when the time
+// budget runs out, and reports how far it got, so a long backfill spreads over several polls instead of failing one.
+async function scanRange(from: bigint, to: bigint): Promise<{ logs: StoredLog[]; reached: bigint }> {
   const ranges: [bigint, bigint][] = [];
   for (let f = from; f <= to; f += CHUNK + 1n) ranges.push([f, f + CHUNK > to ? to : f + CHUNK]);
   const out: StoredLog[] = [];
-  for (let i = 0; i < ranges.length; i += PARALLEL) {
-    const batch = await Promise.all(
-      ranges.slice(i, i + PARALLEL).map(([fromBlock, toBlock]) =>
-        logsClient.getLogs({ address: [deployment.vault, deployment.mandate, deployment.registry, deployment.executor], fromBlock, toBlock }),
-      ),
-    );
+  let reached = from - 1n;
+  const deadline = Date.now() + SCAN_BUDGET_MS;
+  for (let i = 0; i < ranges.length && Date.now() < deadline; i += PARALLEL) {
+    const slice = ranges.slice(i, i + PARALLEL);
+    let batch;
+    try {
+      batch = await Promise.all(
+        slice.map(([fromBlock, toBlock]) =>
+          logsClient.getLogs({ address: [deployment.vault, deployment.mandate, deployment.registry, deployment.executor], fromBlock, toBlock }),
+        ),
+      );
+    } catch (err) {
+      console.warn(`log index: scan stopped at block ${reached}:`, (err as Error).message?.slice(0, 160));
+      break;
+    }
     for (const logs of batch)
       for (const l of logs)
         out.push({
@@ -174,25 +186,27 @@ async function scanRange(from: bigint, to: bigint): Promise<StoredLog[]> {
           transactionHash: l.transactionHash!,
           logIndex: l.logIndex!,
         });
+    reached = slice.at(-1)![1];
   }
-  return out;
+  return { logs: out, reached };
 }
 
 async function indexedLogs(latest: bigint): Promise<Log[]> {
   const deployed = BigInt(deployment.deployBlock);
   const index = (await getJson<LogIndex>(INDEX_NAME)) ?? { cursor: (deployed - 1n).toString(), logs: [] };
   const cursor = BigInt(index.cursor);
-  const target = (() => {
-    const max = cursor + BigInt(MAX_CHUNKS_PER_REQUEST) * (CHUNK + 1n);
-    return max < latest ? max : latest;
-  })();
-  const fresh = target > cursor ? await scanRange(cursor + 1n, target) : [];
+  const max = cursor + BigInt(MAX_CHUNKS_PER_REQUEST) * (CHUNK + 1n);
+  const target = max < latest ? max : latest;
+  const fresh = target > cursor ? await scanRange(cursor + 1n, target) : { logs: [], reached: cursor };
   // still backfilling: also read the recent window live so new events show up immediately
-  const live = target < latest && LOG_RANGE.lookback !== null ? await scanRange(latest - LOG_RANGE.lookback > target ? latest - LOG_RANGE.lookback : target + 1n, latest) : [];
-  if (fresh.length || target > cursor) {
+  const live =
+    fresh.reached < latest && LOG_RANGE.lookback !== null
+      ? (await scanRange(latest - LOG_RANGE.lookback > fresh.reached ? latest - LOG_RANGE.lookback : fresh.reached + 1n, latest)).logs
+      : [];
+  if (fresh.reached > cursor) {
     const seen = new Set(index.logs.map((l) => `${l.transactionHash}-${l.logIndex}`));
-    const merged = [...index.logs, ...fresh.filter((l) => !seen.has(`${l.transactionHash}-${l.logIndex}`))];
-    await setJson(INDEX_NAME, { cursor: target.toString(), logs: merged } satisfies LogIndex);
+    const merged = [...index.logs, ...fresh.logs.filter((l) => !seen.has(`${l.transactionHash}-${l.logIndex}`))];
+    await setJson(INDEX_NAME, { cursor: fresh.reached.toString(), logs: merged } satisfies LogIndex);
     index.logs = merged;
   }
   const seen = new Set(index.logs.map((l) => `${l.transactionHash}-${l.logIndex}`));
