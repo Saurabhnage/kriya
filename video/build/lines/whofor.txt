@@ -1,4 +1,0 @@
-file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\whofor-0.wav'
-file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\whofor-0-sil.wav'
-file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\whofor-1.wav'
-file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\whofor-1-sil.wav'

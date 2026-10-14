@@ -1,6 +1,0 @@
-file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\night-0.wav'
-file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\night-0-sil.wav'
-file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\night-1.wav'
-file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\night-1-sil.wav'
-file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\night-2.wav'
-file 'C:\Users\hp\Desktop\KRIYA\video\build\lines\night-2-sil.wav'
