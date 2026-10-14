@@ -1,0 +1,11 @@
+usage: python voices.py sample | full <provider> <voice>
+Traceback (most recent call last):
+  File "C:\Users\hp\Desktop\KRIYA\video\voices.py", line 307, in <module>
+    grouped_takes(sys.argv[2])
+  File "C:\Users\hp\Desktop\KRIYA\video\voices.py", line 285, in grouped_takes
+    lines = [t for i in g for t in scenes[i]]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\KRIYA\video\voices.py", line 285, in <listcomp>
+    lines = [t for i in g for t in scenes[i]]
+                                   ~~~~~~^^^
+KeyError: 'wish'

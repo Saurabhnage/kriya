@@ -30,6 +30,9 @@ KRIYA lets a user program a **financial mandate** (objective + hard constraints)
 | **Chainlink CRE** VERIFY: external risk feed says Strategy B 34 → 48; signed report → `onReport` → registry | [`0x4789f3eb…97de`](https://testnet.monadexplorer.com/tx/0x4789f3eba6f41ebf39320651474d8be54bdb6e5b2c473abdbac4a1fa691997de) |
 | **Chainlink CRE** EXECUTE (same run, 16 blocks / ~5 s later): mandate breach detected → exit B → A 40 · C 35 · reserve 25, portfolio risk 14/40 | [`0x58557a0a…7d0b`](https://testnet.monadexplorer.com/tx/0x58557a0a88875b078d240543b88f6fc80d81d6a3df1aee997e328d8565e37d0b) |
 
+| **Chainlink CRE, run 3 — Claude decides live** (2026-10-14): VERIFY Strategy C 15 → 45 | [`0x1a4163a3…389a`](https://testnet.monadexplorer.com/tx/0x1a4163a3f30a11ac2493f8c458aca83352f86beee7a69999af4c563094fa389a) |
+| EXECUTE: Claude (`claude-sonnet-5-5`) exits C, keeps A at its 40% cap, 60% reserve, portfolio risk 9/40, `source = CRE` | [`0x34d2a213…1ca0`](https://testnet.monadexplorer.com/tx/0x34d2a213896b353b6d05c22d8e4dcbb32a6d7f78ee2e6f213c12c5045b2b1ca0) |
+
 Full CLI output of the second run: [`docs/cre/monad-simulation-broadcast-2.log`](docs/cre/monad-simulation-broadcast-2.log). Dashboard after the run:
 
 ![KRIYA on Monad testnet](docs/monad-dashboard.jpg)

@@ -21,7 +21,7 @@ export const C = {
   amber: "#fbbf24",
 };
 
-export const LEAD = 0.35; // seconds of silence before each scene's voice line
+export const LEAD = 0.25; // seconds of silence before each scene's voice line
 
 /** Seconds → frame, relative to the scene start, accounting for the voice lead-in. */
 export const useT = () => {

@@ -1,284 +1,210 @@
 [
  {
   "id": "night",
-  "duration": 8.989708,
+  "duration": 8.049917,
   "subs": [
    {
     "start": 0.0,
-    "end": 3.325,
+    "end": 2.961,
     "text": "It's 2:47 in the morning, in Bengaluru."
    },
    {
-    "start": 3.875,
-    "end": 5.522,
+    "start": 3.373,
+    "end": 5.193,
     "text": "Arjun is awake again."
    },
    {
-    "start": 5.972,
-    "end": 8.899,
+    "start": 5.53,
+    "end": 7.999,
     "text": "Not because of work... because of his phone."
    }
   ]
  },
  {
-  "id": "backstory",
-  "duration": 9.814458,
-  "subs": [
-   {
-    "start": 0.0,
-    "end": 5.015,
-    "text": "A couple of years ago, Arjun moved some of his savings into DeFi."
-   },
-   {
-    "start": 5.415,
-    "end": 9.723,
-    "text": "Stablecoins, lending pools... yields that actually beat his bank."
-   }
-  ]
- },
- {
   "id": "secondjob",
-  "duration": 18.557958,
+  "duration": 16.660958,
   "subs": [
    {
     "start": 0.0,
-    "end": 2.598,
+    "end": 2.406,
     "text": "But that yield came with a second job."
    },
    {
-    "start": 3.098,
-    "end": 4.93,
-    "text": "Dashboards before stand-up."
+    "start": 2.744,
+    "end": 8.762,
+    "text": "Dashboards before stand-up. Risk updates at lunch. Transactions at midnight."
    },
    {
-    "start": 5.23,
-    "end": 6.963,
-    "text": "Risk updates at lunch."
-   },
-   {
-    "start": 7.263,
-    "end": 9.625,
-    "text": "Signing transactions at midnight."
-   },
-   {
-    "start": 10.275,
-    "end": 15.181,
+    "start": 9.212,
+    "end": 13.826,
     "text": "And the one night he didn't check... a pool he was in turned risky."
    },
    {
-    "start": 15.531,
-    "end": 18.467,
+    "start": 14.089,
+    "end": 16.611,
     "text": "By morning, he'd lost a chunk of it."
    }
   ]
  },
  {
   "id": "alternatives",
-  "duration": 11.877042,
+  "duration": 8.503708,
   "subs": [
    {
     "start": 0.0,
-    "end": 6.615,
-    "text": "Bots and AI agents? Every one of them wanted his keys. Full control."
+    "end": 3.979,
+    "text": "Bots and AI agents? Every one of them wanted his keys."
    },
    {
-    "start": 7.115,
-    "end": 11.786,
-    "text": "And if the AI got it wrong at three in the morning... who would stop it?"
-   }
-  ]
- },
- {
-  "id": "wish",
-  "duration": 9.798292,
-  "subs": [
-   {
-    "start": 0.0,
-    "end": 4.28,
-    "text": "All Arjun really wanted was to tell his money what he wants..."
-   },
-   {
-    "start": 4.58,
-    "end": 7.226,
-    "text": "and the limits it must never cross."
-   },
-   {
-    "start": 7.726,
-    "end": 9.707,
-    "text": "And then, just... sleep."
+    "start": 4.316,
+    "end": 8.453,
+    "text": "And if the AI got it wrong at 3 AM... who would stop it?"
    }
   ]
  },
  {
   "id": "kriya",
-  "duration": 7.751458,
+  "duration": 6.787604,
   "subs": [
    {
     "start": 0.0,
-    "end": 2.281,
+    "end": 2.261,
     "text": "That's exactly what KRIYA does."
    },
    {
-    "start": 2.731,
-    "end": 7.66,
+    "start": 2.598,
+    "end": 6.737,
     "text": "No more programming transactions. Arjun programs an objective."
    }
   ]
  },
  {
   "id": "mandate",
-  "duration": 16.205167,
+  "duration": 13.032729,
   "subs": [
    {
     "start": 0.0,
-    "end": 1.241,
+    "end": 1.604,
     "text": "Maximise yield."
    },
    {
-    "start": 1.591,
-    "end": 3.668,
+    "start": 1.867,
+    "end": 3.929,
     "text": "Risk, never above forty."
    },
    {
-    "start": 4.018,
-    "end": 6.89,
-    "text": "No more than forty percent in one place."
+    "start": 4.191,
+    "end": 6.409,
+    "text": "Forty percent max in one place."
    },
    {
-    "start": 7.24,
-    "end": 9.494,
-    "text": "Always keep a quarter in reserve."
+    "start": 6.672,
+    "end": 8.933,
+    "text": "A quarter always in reserve."
    },
    {
-    "start": 10.044,
-    "end": 16.114,
-    "text": "And that mandate lives in a smart contract, on Monad. Not in a promise."
+    "start": 9.196,
+    "end": 12.985,
+    "text": "Enforced by a smart contract on Monad. Not a promise."
    }
   ]
  },
  {
   "id": "incident",
-  "duration": 25.279708,
+  "duration": 24.316542,
   "subs": [
    {
     "start": 0.0,
-    "end": 2.811,
+    "end": 2.875,
     "text": "Then, one night, it happened again."
    },
    {
-    "start": 3.261,
-    "end": 7.107,
+    "start": 3.212,
+    "end": 7.011,
     "text": "Strategy B's risk jumped from thirty-four to forty-eight."
    },
    {
-    "start": 7.507,
-    "end": 10.203,
+    "start": 7.311,
+    "end": 9.547,
     "text": "This time, Arjun was fast asleep."
    },
    {
-    "start": 10.803,
-    "end": 14.223,
+    "start": 9.997,
+    "end": 13.761,
     "text": "Chainlink CRE caught it, and verified it onchain."
    },
    {
-    "start": 14.523,
-    "end": 17.079,
-    "text": "KRIYA worked out where the money should go."
+    "start": 13.986,
+    "end": 18.178,
+    "text": "KRIYA worked out where the money should go, and the policy engine checked it."
    },
    {
-    "start": 17.379,
-    "end": 19.189,
-    "text": "The policy engine checked it."
-   },
-   {
-    "start": 19.639,
-    "end": 25.189,
+    "start": 18.516,
+    "end": 24.266,
     "text": "And in about five seconds, on Monad... his money was out of B, and safe."
    }
   ]
  },
  {
-  "id": "guard",
-  "duration": 9.758583,
+  "id": "impact",
+  "duration": 13.5315,
   "subs": [
    {
     "start": 0.0,
-    "end": 5.547,
+    "end": 4.737,
+    "text": "Without KRIYA, that money would have sat at risk until Arjun woke up."
+   },
+   {
+    "start": 5.037,
+    "end": 6.484,
+    "text": "Over four hours."
+   },
+   {
+    "start": 7.009,
+    "end": 8.828,
+    "text": "With KRIYA... five seconds."
+   },
+   {
+    "start": 9.278,
+    "end": 13.482,
+    "text": "Four hundred dollars, moved to safety, while he slept."
+   }
+  ]
+ },
+ {
+  "id": "guard",
+  "duration": 8.772771,
+  "subs": [
+   {
+    "start": 0.0,
+    "end": 5.444,
     "text": "And when an AI proposal tried to cross the line, the contract simply said no."
    },
    {
-    "start": 6.097,
-    "end": 9.668,
+    "start": 5.856,
+    "end": 8.722,
     "text": "AI proposes. Contracts enforce."
    }
   ]
  },
  {
-  "id": "morning",
-  "duration": 10.256208,
-  "subs": [
-   {
-    "start": 0.0,
-    "end": 3.577,
-    "text": "Next morning, Arjun opens KRIYA, with his chai."
-   },
-   {
-    "start": 4.027,
-    "end": 10.165,
-    "text": "What changed, what KRIYA did, and why... every step, right there, onchain."
-   }
-  ]
- },
- {
-  "id": "whofor",
-  "duration": 10.487583,
-  "subs": [
-   {
-    "start": 0.0,
-    "end": 2.406,
-    "text": "KRIYA is for everyone like Arjun."
-   },
-   {
-    "start": 2.806,
-    "end": 6.642,
-    "text": "For DAO treasuries that can't afford one bad night."
-   },
-   {
-    "start": 6.992,
-    "end": 10.397,
-    "text": "And for teams that need rules... not trust."
-   }
-  ]
- },
- {
-  "id": "monad",
-  "duration": 7.152292,
-  "subs": [
-   {
-    "start": 0.0,
-    "end": 7.061,
-    "text": "Built on Monad, where blocks are fast and cheap enough to check every rule, every single time."
-   }
-  ]
- },
- {
   "id": "close",
-  "duration": 8.277167,
+  "duration": 9.712188,
   "subs": [
    {
     "start": 0.0,
-    "end": 0.391,
+    "end": 0.5,
     "text": "KRIYA."
    },
    {
-    "start": 0.891,
-    "end": 5.418,
+    "start": 0.763,
+    "end": 4.487,
     "text": "Your capital, on autopilot. Within your rules."
    },
    {
-    "start": 5.868,
-    "end": 8.186,
-    "text": "Live now, on Monad testnet."
+    "start": 4.749,
+    "end": 9.663,
+    "text": "Built solo by Saurabh Nage... live now, on Monad testnet."
    }
   ]
  }

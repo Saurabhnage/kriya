@@ -1,0 +1,23 @@
+[
+ {"id":"d1","lines":[
+  {"t":"This is KRIYA, live on Monad testnet.","pause":0.35},
+  {"t":"A thousand-dollar test mandate, with hard limits: max risk forty, at most forty percent in any strategy, and a quarter in reserve.","pause":0.35},
+  {"t":"Right now, forty percent sits in Strategy A, and thirty-five in Strategy C."}]},
+ {"id":"d2","lines":[
+  {"t":"Now, let's change reality.","pause":0.3},
+  {"t":"The external risk feed says Strategy C's risk just jumped, from fifteen to forty-five. That's above this mandate's limit.","pause":0.35},
+  {"t":"So we run the real Chainlink CRE workflow, broadcasting to Monad."}]},
+ {"id":"d3","lines":[
+  {"t":"CRE reads the feed with consensus, and writes the verified risk onchain, as a signed report.","pause":0.3},
+  {"t":"It detects the mandate at risk.","pause":0.3},
+  {"t":"Claude decides: exit C, keep A at its forty percent cap, and hold the rest in reserve.","pause":0.3},
+  {"t":"The policy engine re-checks it inside the workflow, and CRE executes the rebalance onchain."}]},
+ {"id":"d4","lines":[
+  {"t":"Back on the live dashboard: allocation number three, executed via Chainlink CRE.","pause":0.3},
+  {"t":"Strategy C is now at zero, and portfolio risk dropped to nine, well inside the limit."}]},
+ {"id":"d5","lines":[
+  {"t":"Both transactions are real, on Monad testnet, delivered through the Chainlink forwarder into KRIYA's executor."}]},
+ {"id":"d6","lines":[
+  {"t":"And if the agent ever proposes something unsafe, like sixty percent in one strategy, the contract reverts it, onchain.","pause":0.4},
+  {"t":"AI proposes. Contracts enforce."}]}
+]

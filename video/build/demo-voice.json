@@ -1,0 +1,113 @@
+[
+ {
+  "id": "d1",
+  "duration": 21.207042,
+  "subs": [
+   {
+    "start": 0.0,
+    "end": 3.043,
+    "text": "This is KRIYA, live on Monad testnet."
+   },
+   {
+    "start": 3.393,
+    "end": 14.839,
+    "text": "A thousand-dollar test mandate, with hard limits: max risk forty, at most forty percent in any strategy, and a quarter in reserve."
+   },
+   {
+    "start": 15.189,
+    "end": 21.157,
+    "text": "Right now, forty percent sits in Strategy A, and thirty-five in Strategy C."
+   }
+  ]
+ },
+ {
+  "id": "d2",
+  "duration": 16.727792,
+  "subs": [
+   {
+    "start": 0.0,
+    "end": 2.22,
+    "text": "Now, let's change reality."
+   },
+   {
+    "start": 2.52,
+    "end": 11.032,
+    "text": "The external risk feed says Strategy C's risk just jumped, from fifteen to forty-five. That's above this mandate's limit."
+   },
+   {
+    "start": 11.382,
+    "end": 16.678,
+    "text": "So we run the real Chainlink CRE workflow, broadcasting to Monad."
+   }
+  ]
+ },
+ {
+  "id": "d3",
+  "duration": 23.938458,
+  "subs": [
+   {
+    "start": 0.0,
+    "end": 7.628,
+    "text": "CRE reads the feed with consensus, and writes the verified risk onchain, as a signed report."
+   },
+   {
+    "start": 7.928,
+    "end": 10.135,
+    "text": "It detects the mandate at risk."
+   },
+   {
+    "start": 10.435,
+    "end": 17.139,
+    "text": "Claude decides: exit C, keep A at its forty percent cap, and hold the rest in reserve."
+   },
+   {
+    "start": 17.439,
+    "end": 23.888,
+    "text": "The policy engine re-checks it inside the workflow, and CRE executes the rebalance onchain."
+   }
+  ]
+ },
+ {
+  "id": "d4",
+  "duration": 12.062104,
+  "subs": [
+   {
+    "start": 0.0,
+    "end": 5.862,
+    "text": "Back on the live dashboard: allocation number three, executed via Chainlink CRE."
+   },
+   {
+    "start": 6.162,
+    "end": 12.012,
+    "text": "Strategy C is now at zero, and portfolio risk dropped to nine, well inside the limit."
+   }
+  ]
+ },
+ {
+  "id": "d5",
+  "duration": 7.644771,
+  "subs": [
+   {
+    "start": 0.0,
+    "end": 7.595,
+    "text": "Both transactions are real, on Monad testnet, delivered through the Chainlink forwarder into KRIYA's executor."
+   }
+  ]
+ },
+ {
+  "id": "d6",
+  "duration": 10.725958,
+  "subs": [
+   {
+    "start": 0.0,
+    "end": 7.3,
+    "text": "And if the agent ever proposes something unsafe, like sixty percent in one strategy, the contract reverts it, onchain."
+   },
+   {
+    "start": 7.7,
+    "end": 10.676,
+    "text": "AI proposes. Contracts enforce."
+   }
+  ]
+ }
+]

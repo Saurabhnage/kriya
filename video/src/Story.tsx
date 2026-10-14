@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, interpolate, spring } from "remotion";
+import { AbsoluteFill, Audio, Sequence, interpolate, spring, staticFile } from "remotion";
 import { C, Chip, INTER, MONO, Shot, Subtitle, Tag, useIn, useT } from "./ui";
 
 type Sub = { start: number; end: number; text: string };
@@ -19,6 +19,33 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
 const H1: React.FC<{ children: React.ReactNode; p: number; size?: number; color?: string; style?: React.CSSProperties }> = ({ children, p, size = 84, color = C.text, style }) => (
   <div style={{ fontFamily: INTER, fontWeight: 800, fontSize: size, lineHeight: 1.1, letterSpacing: -1.5, color, opacity: p, transform: `translateY(${(1 - p) * 26}px)`, filter: `blur(${(1 - p) * 6}px)`, ...style }}>{children}</div>
+);
+
+/** A one-shot sound effect at a scene-relative frame. */
+const Sfx: React.FC<{ src: string; at: number; volume?: number }> = ({ src, at, volume = 1 }) => (
+  <Sequence from={Math.max(0, Math.round(at))} durationInFrames={90} layout="none">
+    <Audio src={staticFile(`sfx/${src}.wav`)} volume={volume} />
+  </Sequence>
+);
+
+/** Clock ticks once per second between two scene frames. */
+const Ticks: React.FC<{ from: number; to: number; volume?: number }> = ({ from, to, volume = 0.22 }) => (
+  <>
+    {Array.from({ length: Math.max(0, Math.floor((to - from) / 30)) }).map((_, i) => (
+      <Sfx key={i} src="tick" at={from + i * 30} volume={volume * (i % 2 ? 0.75 : 1)} />
+    ))}
+  </>
+);
+
+/** Short decaying camera shake + flash after an impact frame. */
+const useImpact = (at: number) => {
+  const { frame } = useT();
+  const k = frame >= at ? Math.max(0, 1 - (frame - at) / 14) : 0;
+  return { shake: `translate(${Math.sin(frame * 2.7) * 9 * k}px, ${Math.cos(frame * 3.3) * 6 * k}px)`, flash: k * 0.16 };
+};
+
+const Flash: React.FC<{ o: number; color?: string }> = ({ o, color = "255,255,255" }) => (
+  <AbsoluteFill style={{ background: `rgba(${color},${o})`, pointerEvents: "none" }} />
 );
 
 const Tint: React.FC<{ color: string; at?: string }> = ({ color, at = "50% 40%" }) => (
@@ -97,6 +124,7 @@ export const Night: React.FC<P> = ({ v }) => {
     <AbsoluteFill>
       <Tint color="rgba(50,80,170,.22)" at="30% 30%" />
       <Skyline />
+      <Ticks from={at(0)} to={at(v.duration + 0.6)} />
       <div style={{ position: "absolute", left: 150, top: 150, opacity: clock }}>
         <Tag color={C.muted}>A STORY ABOUT USERS LIKE ARJUN</Tag>
         <div style={{ marginTop: 40 }}>
@@ -163,10 +191,10 @@ export const SecondJob: React.FC<P> = ({ v }) => {
   const { at, frame, fps } = useT();
   const L = useLine(v);
   const head = useIn(at(0));
-  const rows = [useIn(L(1)), useIn(L(2)), useIn(L(3))];
-  const crash = useIn(L(4), 16);
-  const lost = useIn(L(5));
-  const fall = interpolate(frame, [L(4, 1.0), L(4, 1.0) + fps * 1.6], [0, 1], clamp);
+  const rows = [useIn(L(1)), useIn(L(1, 1.6)), useIn(L(1, 3.1))];
+  const crash = useIn(L(2), 16);
+  const lost = useIn(L(3));
+  const fall = interpolate(frame, [L(2, 1.0), L(2, 1.0) + fps * 1.6], [0, 1], clamp);
   const items = [
     { t: "09:40", d: "Dashboards before stand-up", c: C.chainlink },
     { t: "13:15", d: "Risk updates at lunch", c: C.amber },
@@ -355,14 +383,23 @@ export const Incident: React.FC<P> = ({ v }) => {
   const spike = interpolate(frame, [L(1, 0.3), L(1, 2.2)], [34, 48], clamp);
   const sleep = useIn(L(2));
   const phaseB = frame >= L(3, -0.3);
-  const lit = [useIn(L(3)), useIn(L(3, 1.2)), useIn(L(3, 2.2)), useIn(L(4)), useIn(L(5)), useIn(L(5, 1.0))];
-  const proof = useIn(L(6, 0.2));
-  const showProof = frame >= L(6, 0.2);
-  const timer = interpolate(frame, [L(6, 0.6), L(6, 0.6) + fps * 1.4], [0, 5], clamp);
+  const lit = [useIn(L(3)), useIn(L(3, 1.2)), useIn(L(3, 2.2)), useIn(L(4)), useIn(L(4, 2.6)), useIn(L(4, 3.6))];
+  const proof = useIn(L(5, 0.2));
+  const showProof = frame >= L(5, 0.2);
+  const timer = interpolate(frame, [L(5, 0.6), L(5, 0.6) + fps * 1.4], [0, 5], clamp);
   const over = spike > 40;
   const pulse = over ? 0.5 + 0.5 * Math.sin(frame / 4) : 0;
+  const cross = L(1, 0.3) + Math.round(((40 - 34) / 14) * (L(1, 2.2) - L(1, 0.3)));
+  const done = L(5, 0.6) + fps * 1.4;
+  const i1 = useImpact(cross);
+  const i2 = useImpact(done);
   return (
-    <AbsoluteFill style={{ padding: "90px 120px" }}>
+    <AbsoluteFill style={{ padding: "90px 120px", transform: frame < done ? i1.shake : i2.shake }}>
+      <Ticks from={at(0)} to={cross} volume={0.18} />
+      <Sfx src="hit" at={cross} volume={0.9} />
+      <Sfx src="hit" at={done} volume={0.7} />
+      <Flash o={i1.flash} color="248,113,113" />
+      <Flash o={i2.flash} color="110,231,183" />
       <Tint color={`rgba(${over && !phaseB ? "248,113,113" : "50,80,170"},.2)`} at="50% 40%" />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", opacity: top }}>
         <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
@@ -449,8 +486,11 @@ export const Guard: React.FC<P> = ({ v }) => {
   const a1 = useIn(L(1));
   const a2 = useIn(L(1, 0.9));
   const cardX = hitOn ? 420 - 160 * bounce : -260 + 680 * travel;
+  const imp = useImpact(hit);
   return (
-    <AbsoluteFill style={{ padding: "110px 140px" }}>
+    <AbsoluteFill style={{ padding: "110px 140px", transform: imp.shake }}>
+      <Sfx src="hit" at={hit} volume={0.85} />
+      <Flash o={imp.flash} color="248,113,113" />
       <div style={{ position: "relative", height: 470, marginTop: 30 }}>
         <div style={{ position: "absolute", left: cardX, top: 90, opacity: card, width: 520, background: "rgba(15,22,29,.95)", borderRadius: 24, border: `2px solid ${hitOn ? C.red : C.claude}`, padding: "28px 32px", boxShadow: hitOn ? "0 0 70px rgba(248,113,113,.35)" : "0 20px 60px rgba(0,0,0,.4)", transform: `rotate(${hitOn ? -4 * bounce : 0}deg)` }}>
           <div style={{ fontFamily: MONO, fontSize: 18, letterSpacing: 2, color: C.claude }}>AI PROPOSAL</div>
@@ -500,7 +540,7 @@ export const Morning: React.FC<P> = ({ v }) => {
   const { at } = useT();
   const L = useLine(v);
   const head = useIn(at(0));
-  const tags = [useIn(L(1)), useIn(L(1, 0.9)), useIn(L(1, 1.8)), useIn(L(1, 2.8))];
+  const tags = [useIn(L(1)), useIn(L(1, 1.3)), useIn(L(1, 2.7))];
   return (
     <AbsoluteFill style={{ padding: "110px 120px", flexDirection: "row", gap: 70, alignItems: "center" }}>
       <Tint color="rgba(251,146,60,.2)" at="15% 20%" />
@@ -514,7 +554,7 @@ export const Morning: React.FC<P> = ({ v }) => {
           Arjun slept. <span style={{ color: C.mint }}>His mandate held.</span>
         </H1>
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 40 }}>
-          {[["What changed", C.amber], ["What KRIYA did", C.mint], ["And why", C.claude], ["All onchain", C.monad]].map(([t, c], i) => (
+          {[["Didn't lose sleep", C.amber], ["Didn't lose money", C.mint], ["Every step onchain", C.monad]].map(([t, c], i) => (
             <div key={t} style={{ opacity: tags[i], transform: `translateX(${(1 - tags[i]) * -30}px)` }}>
               <Tag color={c} style={{ fontSize: 24, padding: "12px 20px" }}>✓ {t}</Tag>
             </div>
@@ -533,7 +573,7 @@ export const WhoFor: React.FC<P> = ({ v }) => {
   const cards = [
     { t: "People like Arjun", d: "Savings that work, without the night shift.", c: C.mint, p: useIn(L(0)) },
     { t: "DAO treasuries", d: "Rules that still hold at 3 AM.", c: C.monad, p: useIn(L(1)) },
-    { t: "Teams & funds", d: "Mandates enforced by code, not trust.", c: C.chainlink, p: useIn(L(2)) },
+    { t: "Teams & funds", d: "Mandates enforced by code, not trust.", c: C.chainlink, p: useIn(L(1, 1.9)) },
   ];
   return (
     <AbsoluteFill style={{ alignItems: "center", paddingTop: 150 }}>
@@ -554,18 +594,19 @@ export const WhoFor: React.FC<P> = ({ v }) => {
 // ------------------------------------------------------------ 12. why monad
 export const Monad: React.FC<P> = ({ v }) => {
   const { at, frame, fps } = useT();
+  const L = useLine(v);
   const head = useIn(at(0));
   const stats = [
-    { big: "400 ms", small: "blocks: risk is answered in seconds", c: C.monad },
-    { big: "Low cost", small: "every allocation checked onchain", c: C.mint },
-    { big: "Full EVM", small: "Solidity + Chainlink CRE, unchanged", c: C.chainlink },
+    { big: "400 ms", small: "blocks: risk answered in seconds", c: C.monad },
+    { big: "Nearly gasless", small: "a full CRE rebalance: 0.15 MON (testnet)", c: C.mint },
+    { big: "Every rule", small: "checked onchain, every single time", c: C.chainlink },
   ];
-  const sp = [useIn(at(0.5)), useIn(at(0.9)), useIn(at(1.3))];
+  const sp = [useIn(at(1.0)), useIn(L(0, 1.8)), useIn(L(1))];
   return (
     <AbsoluteFill style={{ padding: "130px 140px", alignItems: "center" }}>
       <Tag color={C.monad} style={{ opacity: head }}>WHY MONAD</Tag>
       <H1 p={head} size={72} style={{ marginTop: 24, textAlign: "center" }}>
-        Fast blocks. <span style={{ color: C.monad }}>Cheap enforcement.</span>
+        Fast blocks. <span style={{ color: C.monad }}>Nearly gasless.</span>
       </H1>
       <div style={{ position: "relative", marginTop: 56, height: 70, overflow: "hidden", width: 1640, maskImage: "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)" }}>
         {Array.from({ length: 22 }).map((_, i) => {
@@ -576,7 +617,7 @@ export const Monad: React.FC<P> = ({ v }) => {
       <div style={{ display: "flex", gap: 34, marginTop: 50 }}>
         {stats.map((x, i) => (
           <div key={x.big} style={{ width: 500, opacity: sp[i], transform: `translateY(${(1 - sp[i]) * 30}px)`, background: "rgba(15,22,29,.92)", borderRadius: 24, border: `1px solid ${C.line}`, borderTop: `4px solid ${x.c}`, padding: "34px 34px" }}>
-            <div style={{ fontFamily: INTER, fontWeight: 800, fontSize: 60, color: x.c }}>{x.big}</div>
+            <div style={{ fontFamily: INTER, fontWeight: 800, fontSize: 52, color: x.c, whiteSpace: "nowrap" }}>{x.big}</div>
             <div style={{ fontFamily: INTER, fontSize: 28, color: C.muted, marginTop: 8, lineHeight: 1.3 }}>{x.small}</div>
           </div>
         ))}
@@ -604,12 +645,66 @@ export const Close: React.FC<P> = ({ v }) => {
         <Tag color={C.mint} style={{ fontSize: 26, padding: "14px 26px", letterSpacing: 1 }}>kriya-monad.vercel.app</Tag>
         <Tag color={C.muted} style={{ fontSize: 26, padding: "14px 26px", letterSpacing: 1 }}>github.com/Saurabhnage/kriya</Tag>
       </div>
-      <div style={{ display: "flex", gap: 40, marginTop: 56, opacity: links, fontFamily: MONO, fontSize: 22, letterSpacing: 2 }}>
+      <div style={{ marginTop: 40, opacity: links, fontFamily: INTER, fontWeight: 600, fontSize: 30, color: C.text }}>
+        Built solo by <span style={{ color: C.mint }}>Saurabh Nage</span>
+      </div>
+      <div style={{ display: "flex", gap: 40, marginTop: 30, opacity: links, fontFamily: MONO, fontSize: 22, letterSpacing: 2 }}>
         <span style={{ color: C.monad }}>BUILT ON MONAD</span>
         <span style={{ color: C.line }}>|</span>
         <span style={{ color: C.chainlink }}>POWERED BY CHAINLINK CRE</span>
         <span style={{ color: C.line }}>|</span>
         <span style={{ color: C.claude }}>DECISIONS BY CLAUDE</span>
+      </div>
+      <Subtitle subs={v.subs} />
+    </AbsoluteFill>
+  );
+};
+
+// ------------------------------------------------------------ 9. impact: the same night, two endings
+export const Impact: React.FC<P> = ({ v }) => {
+  const { at, frame, fps } = useT();
+  const L = useLine(v);
+  const head = useIn(at(0));
+  const without = interpolate(frame, [L(0, 0.4), L(1, 0.4)], [0, 1], { ...clamp, easing: (x) => 1 - (1 - x) ** 3 });
+  const wLabel = useIn(L(1));
+  const withRow = useIn(L(2, -0.2));
+  const sliver = useIn(L(2, 0.9), 12);
+  const imp = useImpact(L(2, 0.9));
+  const money = useIn(L(3));
+  const count = Math.round(interpolate(frame, [L(3, 0.1), L(3, 0.1) + fps * 1.3], [0, 400], { ...clamp, easing: (x) => 1 - (1 - x) ** 3 }));
+  const Row: React.FC<{ label: string; color: string; p: number; children: React.ReactNode }> = ({ label, color, p, children }) => (
+    <div style={{ opacity: p, transform: `translateY(${(1 - p) * 24}px)` }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 24, color: C.muted, marginBottom: 14 }}>
+        <span style={{ color, fontWeight: 700, letterSpacing: 2 }}>{label}</span>
+        <span>3:12 AM ─────────────── 7:30 AM</span>
+      </div>
+      <div style={{ position: "relative", height: 64, borderRadius: 14, background: "#121a23", border: `1px solid ${C.line}`, overflow: "hidden" }}>{children}</div>
+    </div>
+  );
+  return (
+    <AbsoluteFill style={{ padding: "110px 170px", transform: imp.shake }}>
+      <Sfx src="hit" at={L(2, 0.9)} volume={0.8} />
+      <Flash o={imp.flash} color="110,231,183" />
+      <Tag color={C.amber} style={{ opacity: head, alignSelf: "flex-start" }}>THE SAME NIGHT · TWO ENDINGS</Tag>
+      <div style={{ display: "flex", flexDirection: "column", gap: 54, marginTop: 50 }}>
+        <Row label="WITHOUT KRIYA" color={C.red} p={head}>
+          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${without * 100}%`, background: "linear-gradient(90deg, rgba(248,113,113,.55), rgba(248,113,113,.9))" }} />
+          <div style={{ position: "absolute", right: 24, top: 0, bottom: 0, display: "flex", alignItems: "center", fontFamily: INTER, fontWeight: 800, fontSize: 34, color: C.text, opacity: wLabel }}>4 h 18 m at risk</div>
+        </Row>
+        <Row label="WITH KRIYA" color={C.mint} p={withRow}>
+          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 14 * sliver, background: C.mint, boxShadow: `0 0 30px ${C.mint}` }} />
+          <div style={{ position: "absolute", left: 40, top: 0, bottom: 0, display: "flex", alignItems: "center", gap: 18, opacity: sliver }}>
+            <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 40, color: C.mint }}>5 s</span>
+            <span style={{ fontFamily: INTER, fontSize: 28, color: C.muted }}>then safe for the rest of the night</span>
+          </div>
+        </Row>
+      </div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 28, marginTop: 70, opacity: money, transform: `scale(${0.94 + 0.06 * money})`, transformOrigin: "left" }}>
+        <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 130, color: C.mint, textShadow: "0 0 50px rgba(110,231,183,.45)" }}>${count}</span>
+        <div>
+          <div style={{ fontFamily: INTER, fontWeight: 800, fontSize: 48, color: C.text }}>moved to safety while he slept</div>
+          <div style={{ fontFamily: MONO, fontSize: 22, color: C.muted, marginTop: 6 }}>400 test USDC out of Strategy B · real Monad testnet run</div>
+        </div>
       </div>
       <Subtitle subs={v.subs} />
     </AbsoluteFill>

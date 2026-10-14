@@ -1,0 +1,192 @@
+[
+ {
+  "id": "night",
+  "lines": [
+   {
+    "t": "It's 2:47 in the morning, in Bengaluru.",
+    "rate": "-8%",
+    "pitch": "-2Hz",
+    "pause": 0.55
+   },
+   {
+    "t": "Arjun is awake again.",
+    "rate": "-6%",
+    "pause": 0.45
+   },
+   {
+    "t": "Not because of work... because of his phone.",
+    "rate": "-5%",
+    "pause": 0.3
+   }
+  ]
+ },
+ {
+  "id": "secondjob",
+  "lines": [
+   {
+    "t": "But that yield came with a second job.",
+    "rate": "-4%",
+    "pause": 0.45
+   },
+   {
+    "t": "Dashboards before stand-up. Risk updates at lunch. Transactions at midnight.",
+    "rate": "+1%",
+    "pause": 0.6
+   },
+   {
+    "t": "And the one night he didn't check... a pool he was in turned risky.",
+    "rate": "-7%",
+    "pitch": "-2Hz",
+    "pause": 0.35
+   },
+   {
+    "t": "By morning, he'd lost a chunk of it.",
+    "rate": "-8%",
+    "pitch": "-3Hz",
+    "pause": 0.3
+   }
+  ]
+ },
+ {
+  "id": "alternatives",
+  "lines": [
+   {
+    "t": "Bots and AI agents? Every one of them wanted his keys.",
+    "rate": "-2%",
+    "pause": 0.45
+   },
+   {
+    "t": "And if the AI got it wrong at 3 AM... who would stop it?",
+    "rate": "-5%",
+    "pause": 0.3
+   }
+  ]
+ },
+ {
+  "id": "kriya",
+  "lines": [
+   {
+    "t": "That's exactly what KRIYA does.",
+    "rate": "-2%",
+    "pitch": "+2Hz",
+    "pause": 0.45
+   },
+   {
+    "t": "No more programming transactions. Arjun programs an objective.",
+    "rate": "-3%",
+    "pause": 0.3
+   }
+  ]
+ },
+ {
+  "id": "mandate",
+  "lines": [
+   {
+    "t": "Maximise yield."
+   },
+   {
+    "t": "Risk, never above forty."
+   },
+   {
+    "t": "Forty percent max in one place."
+   },
+   {
+    "t": "A quarter always in reserve."
+   },
+   {
+    "t": "Enforced by a smart contract on Monad. Not a promise."
+   }
+  ]
+ },
+ {
+  "id": "incident",
+  "lines": [
+   {
+    "t": "Then, one night, it happened again.",
+    "rate": "-7%",
+    "pitch": "-2Hz",
+    "pause": 0.45
+   },
+   {
+    "t": "Strategy B's risk jumped from thirty-four to forty-eight.",
+    "rate": "-2%",
+    "pause": 0.4
+   },
+   {
+    "t": "This time, Arjun was fast asleep.",
+    "rate": "-8%",
+    "pause": 0.6
+   },
+   {
+    "t": "Chainlink CRE caught it, and verified it onchain.",
+    "rate": "+0%",
+    "pause": 0.3
+   },
+   {
+    "t": "KRIYA worked out where the money should go, and the policy engine checked it.",
+    "rate": "+0%",
+    "pause": 0.45
+   },
+   {
+    "t": "And in about five seconds, on Monad... his money was out of B, and safe.",
+    "rate": "-5%",
+    "pause": 0.3
+   }
+  ]
+ },
+ {
+  "id": "impact",
+  "lines": [
+   {
+    "t": "Without KRIYA, that money would have sat at risk until Arjun woke up.",
+    "rate": "-4%",
+    "pause": 0.4
+   },
+   {
+    "t": "Over four hours.",
+    "rate": "-8%",
+    "pitch": "-2Hz",
+    "pause": 0.7
+   },
+   {
+    "t": "With KRIYA... five seconds.",
+    "rate": "-6%",
+    "pause": 0.6
+   },
+   {
+    "t": "Four hundred dollars, moved to safety, while he slept.",
+    "rate": "-4%",
+    "pause": 0.3
+   }
+  ]
+ },
+ {
+  "id": "guard",
+  "lines": [
+   {
+    "t": "And when an AI proposal tried to cross the line, the contract simply said no.",
+    "rate": "-3%",
+    "pause": 0.55
+   },
+   {
+    "t": "AI proposes. Contracts enforce.",
+    "rate": "-8%",
+    "pause": 0.3
+   }
+  ]
+ },
+ {
+  "id": "close",
+  "lines": [
+   {
+    "t": "KRIYA."
+   },
+   {
+    "t": "Your capital, on autopilot. Within your rules."
+   },
+   {
+    "t": "Built solo by Saurabh Nage... live now, on Monad testnet."
+   }
+  ]
+ }
+]

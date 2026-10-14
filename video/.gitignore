@@ -1,3 +1,6 @@
 node_modules/
 out/
 build/*.wav
+build/lines/
+samples/
+.env
