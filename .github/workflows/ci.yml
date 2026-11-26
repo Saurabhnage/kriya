@@ -79,3 +79,16 @@ jobs:
         run: npm run e2e
       - if: failure()
         run: tail -100 /tmp/next.log
+
+  e2e-market:
+    name: End-to-end, market risk engine (Anvil + CMC/Cournot fixtures + Atlas mock feeds)
+    runs-on: ubuntu-latest
+    needs: [contracts, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: web/package-lock.json }
+      - run: npm ci
+        working-directory: web
+      - run: ./scripts/e2e-market-local.sh

@@ -14,6 +14,7 @@ Rules for the agent doing this:
 2. Check tools: `node -v` (≥ 20), `forge --version`, optional `cre version` and `bun -v` for the CRE run.
 3. `cd contracts && forge test`: expect 23 passing.
 4. `cd web && npm ci && npm test`: expect 47 passing. `npx tsc --noEmit` and `npx eslint src` should be clean.
+5. Optional, no keys needed: `./scripts/e2e-market-local.sh` runs the market risk engine end to end on Anvil (CMC/Cournot fixtures, Atlas mock feeds): expect 8 passing.
 
 ## 1. Keys and env (ask the developer for anything missing)
 Create `web/.env.local` from `web/.env.example`:
