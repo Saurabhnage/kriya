@@ -87,7 +87,34 @@ export type ProposalResponse = {
   validation: { ok: true; portfolioRisk: number; reserveBps: number; expectedApyBps: number } | { ok: false; error: string; detail: string };
   analysis: { strategy: string; assessment: string }[];
   llmRejected: { error: string; detail: string } | null;
+  market?: { regime: string; at: number; cournot: { claim: string; probability: number; direction: "stress" | "relief" } | null } | null;
+  memory?: { mode: "living-brain" | "local-fallback"; market: MemoryItem[]; decisions: MemoryItem[] } | null;
 };
+
+export type MemoryItem = { title: string; summary: string; similarity: number | null; pageType?: string };
+
+export type Factor = { name: string; points: number; detail: string; source: string };
+
+export type MarketResponse = {
+  enabled: { market: boolean; coinmarketcap: boolean; atlasFeeds: { symbol: string; feed: string }[]; cournot: string; memory: string; llm: boolean };
+  intel: {
+    at: number;
+    regime: string;
+    cmc: { quotes: Record<string, { price: number; change24h: number; change7d: number }>; fearGreed: { value: number; classification: string } | null } | null;
+    atlas: { symbol: string; feed: string; description: string; price: number; updatedAt: number; stale: boolean }[];
+    cournot: { claim: string; direction: "stress" | "relief"; probability: number; marketIds: string[]; requestId: string | null; proofId: string; at: number } | null;
+    scores: { address: string; name: string; kind: string; base: number; risk: number; factors: Factor[] }[];
+    overrides: Record<string, number>;
+    errors: string[];
+  } | null;
+  cournot: { claim: string; direction: "stress" | "relief"; probability: number; marketIds: string[]; result: unknown; basis: unknown; requestId: string | null; proofId: string; at: number } | null;
+  evidence: {
+    cmcCalls: { ts: number; endpoint: string; http: number; credits?: number }[];
+    cournotProofs: { id: string; endpoint: string; status: number; requestId: string | null; ts: number }[];
+  };
+};
+
+export type CournotMarket = { id: string; title: string; endTime?: string; matchingConfidence?: number };
 
 export type LoopStep = { step: string; status: "ok" | "skip" | "warn" | "error"; detail: string; txHash?: string };
 

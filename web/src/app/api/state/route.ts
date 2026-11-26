@@ -24,6 +24,8 @@ function toDecision(entry: JournalEntry | undefined) {
     validation: p.validation,
     analysis: p.analysis,
     llmRejected: p.llmRejected ?? null,
+    market: p.market ?? null,
+    memory: p.memory ?? null,
   };
 }
 

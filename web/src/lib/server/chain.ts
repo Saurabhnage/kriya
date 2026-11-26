@@ -25,7 +25,9 @@ export const LOG_RANGE = LOGS_RPC_URL
   ? { chunk: 500_000n, lookback: null }
   : chain.id === 10143
     ? { chunk: 99n, lookback: 400n }
-    : { chunk: 9_000n, lookback: null };
+    : chain.id === 97
+      ? { chunk: 4_999n, lookback: null } // BSC public RPCs cap eth_getLogs at 5,000 blocks
+      : { chunk: 9_000n, lookback: null };
 
 function wallet(envName: string) {
   const pk = process.env[envName]?.trim();

@@ -15,9 +15,11 @@ remappings = [
 [rpc_endpoints]
 sepolia = "${SEPOLIA_RPC_URL}"
 monad = "https://testnet-rpc.monad.xyz"
+bscTestnet = "https://data-seed-prebsc-1-s1.bnbchain.org:8545"
 
 [etherscan]
 sepolia = { key = "${ETHERSCAN_API_KEY}" }
+bscTestnet = { key = "${ETHERSCAN_API_KEY}", chain = 97 }
 
 [fuzz]
 runs = 1000

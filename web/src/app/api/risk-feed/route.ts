@@ -1,6 +1,7 @@
 import { getRiskFeed, journal, resetRiskFeed, setRisk } from "@/lib/server/store";
 import { readStrategies } from "@/lib/server/state";
 import { fail, json, limited } from "@/lib/server/http";
+import { clearOverrides, marketEnabled, refreshMarketRisk, setOverride } from "@/lib/server/market/engine";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +15,19 @@ export async function GET() {
   return json({ source: feed.source, updatedAt: feed.updatedAt, strategies });
 }
 
-// Demo control: "change reality". Body: { strategy, risk } or { reset: true }
+// Demo control: "change reality" (scenario override on top of live market risk). Body: { strategy, risk } or { reset: true }
 export async function POST(request: Request) {
   const blocked = await limited("risk-feed-write", 20, 60);
   if (blocked) return blocked;
   try {
     const body = await request.json();
     if (body.reset) {
+      await clearOverrides();
+      if (marketEnabled()) {
+        const { feed } = await refreshMarketRisk();
+        await journal({ kind: "reality", title: "Scenario overrides cleared: risk feed back to live market data" });
+        return json(feed);
+      }
       const feed = await resetRiskFeed();
       await journal({ kind: "reality", title: "External risk feed reset to baseline" });
       return json(feed);
@@ -31,6 +38,8 @@ export async function POST(request: Request) {
     const s = strategies.find((x) => x.address.toLowerCase() === String(body.strategy).toLowerCase());
     if (!s) throw new Error("unknown strategy");
     const before = (await getRiskFeed()).risks[s.address.toLowerCase()] ?? s.risk;
+    // A manual "change reality" is a scenario override that the live market engine keeps applying until reset.
+    await setOverride(s.address, risk);
     const feed = await setRisk(s.address, risk);
     await journal({ kind: "reality", title: `External risk feed: ${s.name.split(" - ")[0]} risk ${before} → ${risk}`, detail: "Reality changed. Awaiting verification." });
     return json(feed);

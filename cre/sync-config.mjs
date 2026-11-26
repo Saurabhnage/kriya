@@ -2,12 +2,14 @@
 // Usage: node sync-config.mjs [agentUrl] [chainId]
 //   chainId 11155111 (default) → config.staging.json + config.production.json (Ethereum Sepolia)
 //   chainId 10143              → config.monad.json (Monad testnet)
+//   chainId 97                 → config.bnb.json (BNB Chain testnet)
 import { readFileSync, writeFileSync } from "node:fs";
 const agentUrl = process.argv[2] ?? "http://localhost:3000";
 const chainId = Number(process.argv[3] ?? 11155111);
 const CHAINS = {
   11155111: { name: "ethereum-testnet-sepolia", files: ["config.staging.json", "config.production.json"] },
   10143: { name: "monad-testnet", files: ["config.monad.json"] },
+  97: { name: "binance_smart_chain-testnet", files: ["config.bnb.json"] },
 };
 const target = CHAINS[chainId];
 if (!target) throw new Error(`Unsupported chain ${chainId}`);

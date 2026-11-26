@@ -1,5 +1,5 @@
 import { defineChain, type Address } from "viem";
-import { sepolia, foundry, monadTestnet } from "viem/chains";
+import { sepolia, foundry, monadTestnet, bscTestnet } from "viem/chains";
 import { deployments } from "./generated/deployments";
 
 export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 11155111);
@@ -7,6 +7,7 @@ export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 11155111);
 const local = defineChain({ ...foundry, rpcUrls: { default: { http: ["http://127.0.0.1:8545"] } } });
 const CHAINS = {
   11155111: { chain: sepolia, rpc: "https://ethereum-sepolia-rpc.publicnode.com", explorer: "https://sepolia.etherscan.io", faucet: "https://faucets.chain.link/sepolia" },
+  97: { chain: bscTestnet, rpc: "https://data-seed-prebsc-1-s1.bnbchain.org:8545", explorer: "https://testnet.bscscan.com", faucet: "https://www.bnbchain.org/en/testnet-faucet" },
   10143: { chain: monadTestnet, rpc: "https://testnet-rpc.monad.xyz", explorer: "https://testnet.monadexplorer.com", faucet: "https://faucet.monad.xyz" },
   31337: { chain: local, rpc: "http://127.0.0.1:8545", explorer: null, faucet: null },
 } as const;

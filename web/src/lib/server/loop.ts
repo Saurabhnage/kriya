@@ -7,6 +7,8 @@ import { evaluateHealth, type StrategyView } from "../policy";
 import { propose, type DecisionInput, type Proposal } from "./agent";
 import { listMandateUsers, readSnapshot, readStrategies } from "./state";
 import { getRiskFeed, journal } from "./store";
+import { readIntel, refreshIfStale } from "./market/engine";
+import { memoryMode, recall, remember } from "./memory";
 import type { LoopStep } from "../client";
 
 const name = (strategies: StrategyView[], a: string) =>
@@ -19,8 +21,13 @@ export function withRisks(strategies: StrategyView[], risks?: Record<string, num
 }
 
 export async function decisionInput(user: Address, risks?: Record<string, number>): Promise<DecisionInput> {
-  const snap = await readSnapshot(user);
+  const [snap, intel] = await Promise.all([readSnapshot(user), readIntel()]);
   if (!snap.mandate.exists) throw new Error("No mandate for this address");
+  // Living Brain: similar past market regimes + this mandate's own decision history.
+  const [marketMem, decisionMem] = await Promise.all([
+    intel ? recall("market", `market regime ${intel.regime}`, 3) : Promise.resolve([]),
+    recall(`user:${user.toLowerCase()}`, `allocation decisions outcomes ${snap.mandate.params.objective} ${intel?.regime ?? ""}`, 4),
+  ]);
   return {
     user,
     params: snap.mandate.params,
@@ -28,6 +35,15 @@ export async function decisionInput(user: Address, risks?: Record<string, number
     strategies: withRisks(snap.strategies, risks),
     positions: snap.positions,
     idle: snap.idle,
+    market: intel
+      ? {
+          regime: intel.regime,
+          at: intel.at,
+          scores: intel.scores.map((x) => ({ address: x.address, name: x.name, risk: x.risk, factors: x.factors })),
+          cournot: intel.cournot ? { claim: intel.cournot.claim, probability: intel.cournot.probability, direction: intel.cournot.direction } : null,
+        }
+      : null,
+    memory: { mode: memoryMode(), market: marketMem, decisions: decisionMem },
   };
 }
 
@@ -88,6 +104,13 @@ export async function journalProposal(user: Address, p: Proposal, strategies: St
       detail: `${p.llmRejected.detail}. Falling back to the deterministic optimizer.`,
     });
   }
+  await remember(
+    `user:${user.toLowerCase()}`,
+    `Decision ${new Date(p.createdAt).toISOString().slice(0, 16)}Z (${p.engine === "llm" ? "Claude" : "deterministic"})`,
+    `Trigger: ${p.trigger}. Market: ${p.market?.regime ?? "n/a"}. Allocation: ${mix.join(", ")}. ${
+      p.validation.ok ? `Portfolio risk ${p.validation.portfolioRisk}, expected APY ${(p.validation.expectedApyBps / 100).toFixed(2)}%.` : `Rejected: ${p.validation.error}.`
+    } Rationale: ${p.rationale}`,
+  );
   await journal({
     ...ctx,
     user,
@@ -120,12 +143,13 @@ export async function runKeeper(only?: Address, onStep?: (step: LoopStep) => voi
     steps.push(step);
     onStep?.(step);
   };
+  const intel = await refreshIfStale();
   const feed = await getRiskFeed();
   const onchain = await readStrategies();
   push({
     step: "OBSERVE",
     status: "ok",
-    detail: onchain.map((s) => `${name(onchain, s.address)} onchain ${s.risk} / feed ${feed.risks[s.address.toLowerCase()] ?? s.risk}`).join(", "),
+    detail: (intel ? `Market (CMC + Atlas + Cournot): ${intel.regime}. ` : "") + onchain.map((s) => `${name(onchain, s.address)} onchain ${s.risk} / feed ${feed.risks[s.address.toLowerCase()] ?? s.risk}`).join(", "),
   });
 
   // VERIFY: sync changed risk scores onchain
@@ -182,9 +206,11 @@ export async function runKeeper(only?: Address, onStep?: (step: LoopStep) => voi
     try {
       const hash = await executeViaAgent(user, p);
       push({ step: "EXECUTE", status: "ok", detail: "Allocation executed", txHash: hash });
+      await remember(`user:${user.toLowerCase()}`, `Executed onchain ${new Date().toISOString().slice(0, 16)}Z`, `Allocation executed by KriyaExecutor in tx ${hash}. ${p.rationale}`);
     } catch (err) {
       const reason = decodeRevert(err);
       await journal({ ...ctx, user, kind: "reject", title: `Executor refused allocation: ${reason}` });
+      await remember(`user:${user.toLowerCase()}`, "Executor refused an allocation", `The onchain executor reverted: ${reason}.`);
       push({ step: "EXECUTE", status: "error", detail: reason });
     }
   }

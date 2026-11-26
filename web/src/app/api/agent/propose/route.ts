@@ -30,6 +30,8 @@ export async function POST(request: Request) {
       analysis: p.analysis,
       llmRejected: p.llmRejected ?? null,
       baseline: p.baseline,
+      market: p.market ?? null,
+      memory: p.memory ?? null,
     });
   } catch (err) {
     return fail(err, 400);

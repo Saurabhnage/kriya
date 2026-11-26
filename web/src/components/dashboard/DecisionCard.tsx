@@ -44,6 +44,29 @@ export function DecisionCard({ decision, state, previewing }: { decision: Decisi
           </span>
         </div>
         <p className="mt-3 text-sm leading-relaxed">{decision.rationale}</p>
+        {decision.market && (
+          <p className="mt-2 text-xs text-muted">
+            <span className="text-ink">Market at decision:</span> {decision.market.regime}
+            {decision.market.cournot && ` · Cournot ${(decision.market.cournot.probability * 100).toFixed(1)}% on "${decision.market.cournot.claim}"`}
+          </p>
+        )}
+        {decision.memory && decision.memory.market.length + decision.memory.decisions.length > 0 && (
+          <details className="mt-2 text-xs">
+            <summary className="cursor-pointer text-accent-2">
+              Recalled from Living Brain{decision.memory.mode === "local-fallback" ? " (local fallback)" : ""}: {decision.memory.decisions.length} past decisions ·{" "}
+              {decision.memory.market.length} similar market regimes
+            </summary>
+            <ul className="mt-1 space-y-1 text-muted">
+              {[...decision.memory.decisions, ...decision.memory.market].map((m, i) => (
+                <li key={i} className="border-l-2 border-accent-2/50 pl-2">
+                  <span className="text-ink">{m.title}</span>
+                  {m.similarity != null && <span> · relevance {m.similarity.toFixed(2)}</span>}
+                  <span className="block">{m.summary}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
         {decision.llmRejected && decision.llmRejected.error !== "LLMUnavailable" && (
           <p className="mt-2 text-xs text-warn">
             Claude&apos;s first proposal was rejected by the policy engine ({decision.llmRejected.error}); the deterministic optimizer was used.

@@ -8,6 +8,95 @@ KRIYA lets a user program a **financial mandate** (objective + hard constraints)
 
 ---
 
+## BNB Bangkok 2026: KRIYA on BNB Chain, driven by live market data
+
+At BNB Bangkok, KRIYA moved to **BNB Chain** and its risk view moved from a demo feed to **live market intelligence**. In practice, three things changed:
+
+1. **Risk comes from the market.** The **KRIYA Market Risk Engine** turns **CoinMarketCap** market data, **Atlas** onchain oracle prices and **Cournot** event probabilities into a verified risk score for every strategy. Chainlink CRE (or the keeper) writes those scores onchain, and that is what triggers rebalances.
+2. **The agent remembers.** **Living Brain** (ChatAndBuild) is KRIYA's persistent memory. It stores every market regime and every decision, and Claude recalls similar past regimes and its own past calls before each new decision.
+3. **Real-world assets are in the strategy universe.** Strategy C is a **tokenized T-Bill (RWA)** vault. Stablecoin-peg risk measured by Atlas is applied to it and to the lending strategy.
+
+**Claude still decides** (with the deterministic optimizer as a fallback). Rules still constrain, CRE verifies, and the contract enforces. Living Brain gives the agent memory; it does not replace its reasoning.
+
+### Live on BNB Chain testnet (chain 97)
+
+| Contract | Address |
+| --- | --- |
+| KriyaExecutor (CRE receiver) | `TODO after ./scripts/deploy-bsc.sh` |
+| KriyaVault | `TODO` |
+| KriyaMandate | `TODO` |
+| KriyaStrategyRegistry | `TODO` |
+| Test USDC | `TODO` |
+| Strategy A / B / C | `TODO` |
+| Chainlink CRE MockKeystoneForwarder (`binance_smart_chain-testnet`) | `0xA238e42cb8782808DBb2F37E19859244ec4779B0` |
+| Atlas feeds read by the engine (BNB/USD, USDT/USD, USDC/USD) | `TODO` |
+
+| Step | Tx |
+| --- | --- |
+| Open mandate | `TODO` |
+| Market Risk Engine → VERIFY (risk written onchain) | `TODO` |
+| Rebalance driven by live market risk | `TODO` |
+| Guardrail revert (`ExposureExceeded`) | `TODO` |
+
+### The market loop
+
+```
+CoinMarketCap Pro API ─┐  BNB volatility, Fear & Greed, stablecoin quotes
+Atlas onchain feeds ───┼─► KRIYA Market Risk Engine ─► /api/risk-feed ─► CRE / keeper VERIFY ─► registry (onchain)
+Cournot oracle ────────┘  P(market-stress event)       (web/src/lib/riskModel.ts, pure + tested)        │
+                                                                                                        ▼
+Living Brain ◄── remembers regimes + decisions ◄── Claude DECIDE (recalls memory) ◄── DETECT mandate breach
+                                                        │
+                                       CONSTRAIN (policy) → EXECUTE (KriyaExecutor enforces onchain)
+```
+
+| Strategy | Live risk factors (added to the base score) |
+| --- | --- |
+| A, Stable Lending (base 21) | Stablecoin peg: worst of USDT/USDC deviation × 20, max +30 (Atlas preferred, CMC fallback) · extreme fear (Fear & Greed ≤ 20) +3 |
+| B, BNB/USDT LP Yield (base 34) | BNB volatility: \|24h\|×1.5 + \|7d\|×0.5, max +25 (CMC) · Atlas vs CMC price gap > 2% +5 · Fear & Greed ≥ 80 +3 or ≤ 20 +5 · Cournot stress probability: (p − 0.2) × 25 |
+| C, Tokenized T-Bill, RWA (base 15) | Stablecoin peg at half weight (settles in USDC) |
+
+A 6.5% BNB drop in a day (with −9% on the week) adds +14 to Strategy B, taking it from 34 to 48. That breaches a max-risk-40 mandate, so KRIYA exits B. This is tested end to end onchain (`web/scripts/e2e-market.mjs`). Manual "change reality" controls still work as scenario overrides on top of live data until reset.
+
+### Cournot Integration
+
+- **Where it's called:** `web/src/lib/server/market/cournot.ts`, from the dashboard's *Event risk* panel through `POST /api/market/cournot`. `resolve` (free) matches the claim to Cournot markets. `assess` calls `POST /intelligence/v1/probability`, with the `COURNOT-API-KEY` header kept server-side.
+- **How the probability is used:** the user marks the claim as a *stress* or *relief* scenario. The stress probability `p` adds an event-risk premium of `round(max(0, p − 0.2) × 25)` to the BNB LP strategy's verified risk (`web/src/lib/riskModel.ts`). If that pushes the strategy above the mandate's max risk, the next loop verifies the score onchain and Claude moves the capital out. Mocked, hardcoded or static probabilities are never used: without a live assessment, the factor is simply absent.
+- **Where users see the claim and evidence:** the *Market intelligence → Event risk* panel shows the exact claim, the returned probability, its effect, and Cournot's `result` and `basis` rendered verbatim. The *Live risk per strategy* list shows the resulting "Event risk (forward-looking)" factor tagged `[Cournot]`. KRIYA's own text (the effect line) is kept separate from Cournot's output.
+- **Proof of a successful call:** every call's sanitized request and response is stored with an id and request id (`GET /api/market` → `evidence.cournotProofs`), and the latest assessment is journaled in the activity timeline. Example: `TODO proof id / request id`.
+
+### CoinMarketCap × Atlas
+
+- **CoinMarketCap Pro API** (`web/src/lib/server/market/cmc.ts`, server-side only): `/v2/cryptocurrency/quotes/latest` (BNB, USDT, USDC) and `/v3/fear-and-greed/latest` are core inputs to the risk model. Every call is logged (endpoint, HTTP status, credits) and shown in the dashboard as proof of live usage.
+- **Atlas Oracle** (`web/src/lib/server/market/atlas.ts`): AggregatorV3-compatible feeds read **onchain on BNB Chain** (`ATLAS_FEED_BNB_USD`, `ATLAS_FEED_USDT_USD`, `ATLAS_FEED_USDC_USD`). Atlas is the preferred source for stablecoin pegs (stale feeds are ignored), and Atlas BNB/USD is cross-checked against CMC.
+- One-page write-up: [docs/BNB_BANGKOK_WRITEUP.md](docs/BNB_BANGKOK_WRITEUP.md).
+
+### Living Brain (ChatAndBuild)
+
+- `web/src/lib/server/memory.ts` uses `@living-brain/sdk`, with one isolated subject for the market and one per mandate owner.
+- **Remember:** every market regime (when scores move, or every 30 minutes), every decision (trigger, market, allocation, rationale), and every onchain execution or refusal.
+- **Retrieve:** before each decision, KRIYA searches for similar past regimes and the mandate's own decision history.
+- **Connect:** the memories go into Claude's context, and Claude is instructed to cite them when they change its decision. The decision card shows exactly what was recalled. *Generate weekly market brief* asks Living Brain to synthesize everything KRIYA observed this week.
+
+### Deploy to BNB Chain testnet
+
+```bash
+PRIVATE_KEY=0x... AGENT_ADDRESS=0x... ./scripts/deploy-bsc.sh
+```
+
+Then copy `web/.env.example` to `web/.env.local`, set `NEXT_PUBLIC_CHAIN_ID=97` and the keys, and run `npm run dev`. For Chainlink CRE on BNB Chain:
+
+```bash
+cd cre && cre workflow simulate kriya-workflow --target bnb-settings --non-interactive --trigger-index 0 --broadcast
+```
+
+### Business model and roadmap
+
+- **Revenue:** a management fee on capital under mandate (0.25–0.5% a year), plus a B2B API that lets wallets and RWA issuers offer "mandates, not transactions" to their users.
+- **Next:** real BNB Chain venues for strategies A to C (lending markets, PancakeSwap LP, tokenized T-bill issuers), more Atlas feeds per asset, a per-user vault factory, a production CRE deployment, an audit, then mainnet.
+
+---
+
 ## Live on Monad testnet (Metropolis)
 
 **App:** https://kriya-monad.vercel.app · chain id 10143 · [CRE simulation log](docs/cre/monad-simulation-broadcast.log)
@@ -218,6 +307,8 @@ The **Run autonomous loop** button in the dashboard runs the identical loop from
 | --- | --- | --- |
 | Contracts | 19 unit tests + 4 fuzz properties (1,000 runs each): funds are always conserved, `validateAllocation` always agrees with execution, every executed allocation leaves the mandate compliant, a strategy above max risk can never be held | `cd contracts && forge test` |
 | Policy engine | 12 tests mirroring the contract cases, plus 2,000 random mandates checking the optimizer never produces an invalid allocation | `cd web && npm test` |
+| Risk model | 7 tests for the Market Risk Engine (volatility, depeg, Cournot premium, oracle disagreement, clamping, deterministic order) | `cd web && npm test` |
+| Market end to end | 8 checks against Anvil with AggregatorV3 feeds and CMC/Cournot fixtures: calm market stays safe, BNB sell-off breaches the mandate, loop verifies onchain and exits the LP strategy, Living Brain recall, Cournot premium, scenario overrides | `cd web && node scripts/e2e-market.mjs` (setup in the file header) |
 | End to end | 15 checks against Anvil + the real API + wallet transactions: open mandate, allocate, guardrail revert, risk spike, verified rebalance, emergency exit, input validation, rate limits | `cd web && npm run e2e` (setup in `web/scripts/e2e.mjs`) |
 | CRE workflow | Typecheck + WASM build | `cd cre && cre workflow build kriya-workflow` |
 
@@ -246,6 +337,8 @@ The dashboard is a one-screen **mission control**: mandate and allocation on the
 ## Build timeline & originality
 
 KRIYA was built from scratch during the Monad Metropolis Hackathon window: the first commit is 2026-10-06 and the full history is in this repository. The same codebase was also entered in TOKEN2049 Origins (Ethereum Sepolia). The Monad deployment, the Monad build of the app and the Monad documentation were added for Metropolis.
+
+**BNB Bangkok (25–27 November 2026):** KRIYA existed before this hackathon. Built during the event, on the `bnb-bangkok` branch: BNB Chain testnet support (app, deploy script, CRE target), the Market Risk Engine (CoinMarketCap + Atlas + Cournot), Living Brain memory for the agent, the Market intelligence dashboard panel, and the tests for all of it.
 
 ## AI disclosure
 

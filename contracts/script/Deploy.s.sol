@@ -18,10 +18,13 @@ import {KriyaExecutor} from "../src/KriyaExecutor.sol";
 contract Deploy is Script {
     address constant SEPOLIA_MOCK_FORWARDER = 0x15fC6ae953E024d975e77382eEeC56A9101f9F88;
     address constant MONAD_TESTNET_MOCK_FORWARDER = 0xB9F79d863261869B234c481D1f9A7af84AeAd192;
+    /// CRE simulation forwarder for BNB Chain testnet (chain-name `binance_smart_chain-testnet`).
+    address constant BSC_TESTNET_MOCK_FORWARDER = 0xA238e42cb8782808DBb2F37E19859244ec4779B0;
 
     /// CRE simulation forwarder for this chain (changeable later via setForwarderAddress).
     function defaultForwarder() internal view returns (address) {
         if (block.chainid == 10143) return MONAD_TESTNET_MOCK_FORWARDER;
+        if (block.chainid == 97) return BSC_TESTNET_MOCK_FORWARDER;
         return SEPOLIA_MOCK_FORWARDER;
     }
 
@@ -47,8 +50,8 @@ contract Deploy is Script {
         address b = address(new MockStrategy(IERC20(address(usdc)), address(vault), "Strategy B"));
         address c = address(new MockStrategy(IERC20(address(usdc)), address(vault), "Strategy C"));
         registry.addStrategy(a, "Strategy A - Stable Lending", 840, 21);
-        registry.addStrategy(b, "Strategy B - LP Yield", 1120, 34);
-        registry.addStrategy(c, "Strategy C - T-Bill Vault", 680, 15);
+        registry.addStrategy(b, "Strategy B - BNB/USDT LP Yield", 1120, 34);
+        registry.addStrategy(c, "Strategy C - Tokenized T-Bill (RWA)", 680, 15);
 
         vm.stopBroadcast();
 

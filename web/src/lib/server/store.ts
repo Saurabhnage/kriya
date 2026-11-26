@@ -75,6 +75,9 @@ export async function getRiskFeed(): Promise<RiskFeed> {
   return loadLocal(`risk-feed-${deployment.chainId}`, defaultFeed);
 }
 
+/** Replace the whole feed (used by the market risk engine). */
+export const saveRiskFeed = (feed: RiskFeed) => saveFeed(feed);
+
 async function saveFeed(feed: RiskFeed) {
   if (redisEnabled) await redis("SET", ns("risk-feed"), JSON.stringify(feed));
   else saveLocal(`risk-feed-${deployment.chainId}`, feed);

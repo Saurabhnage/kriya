@@ -15,3 +15,8 @@ monad-settings:
   rpcs:
     - chain-name: monad-testnet
       url: https://testnet-rpc.monad.xyz
+
+bnb-settings:
+  rpcs:
+    - chain-name: binance_smart_chain-testnet
+      url: https://data-seed-prebsc-1-s1.bnbchain.org:8545

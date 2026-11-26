@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import type { Memory } from "./memory";
 import {
   evaluateHealth,
   optimizeAllocation,
@@ -18,6 +19,19 @@ import {
 
 export const MODEL = process.env.KRIYA_MODEL ?? "claude-sonnet-5-5";
 
+export type MarketContext = {
+  regime: string;
+  at: number;
+  scores: { address: string; name: string; risk: number; factors: { name: string; points: number; detail: string; source: string }[] }[];
+  cournot: { claim: string; probability: number; direction: "stress" | "relief" } | null;
+};
+
+export type MemoryContext = {
+  mode: "living-brain" | "local-fallback";
+  market: Memory[]; // similar past market regimes
+  decisions: Memory[]; // this mandate's past decisions and outcomes
+};
+
 export type DecisionInput = {
   user: string;
   params: MandateParams;
@@ -25,6 +39,8 @@ export type DecisionInput = {
   strategies: StrategyView[]; // risk = verified risk view used for this decision
   positions: { strategy: string; amount: bigint }[];
   idle: bigint;
+  market?: MarketContext | null; // CoinMarketCap + Atlas + Cournot (KRIYA Market Risk Engine)
+  memory?: MemoryContext | null; // Living Brain
 };
 
 export type Proposal = {
@@ -38,6 +54,8 @@ export type Proposal = {
   validation: Validation;
   baseline: Allocation;
   createdAt: number;
+  market?: { regime: string; at: number; cournot: MarketContext["cournot"] } | null;
+  memory?: MemoryContext | null;
 };
 
 const ProposalSchema = z.object({
@@ -87,6 +105,10 @@ Hard rules your proposal must satisfy (otherwise it is discarded):
 - Portfolio risk = sum(bps_i * risk_i) + reserveBps * 2, divided by 10000, must be <= maxRisk.
 - bps are integers; total allocated bps <= 10000 - minReserveBps.
 
+You also receive:
+- marketIntelligence: live data from the KRIYA Market Risk Engine (CoinMarketCap prices, volatility and Fear & Greed; Atlas onchain oracle prices; a Cournot probability for a market-stress event) and the factors that produced each strategy's verified risk. Use it to judge which risks are transient and which are structural.
+- memory: retrieved from Living Brain, KRIYA's persistent memory. "market" holds similar past regimes; "decisions" holds this mandate's past decisions and outcomes. Stay consistent with past decisions unless the data changed, and when a memory changes your decision, say so briefly in the rationale (e.g. "as in the last BNB drawdown").
+
 Objective: pursue the mandate's objective (typically the best risk-adjusted yield) within those rules. Prefer stability: avoid needless churn when the current allocation is still compliant, and when a strategy breaches the mandate, move its capital to the best compliant alternative.
 Write the rationale for an end user: concrete numbers, no hype. Never compute portfolio risk or blended APY yourself: quote currentPortfolio's figures, or none — the policy engine reports exact numbers for your proposal.`;
 
@@ -117,6 +139,15 @@ function describe(input: DecisionInput, trigger: string) {
         expectedApyPct: s.apyBps / 100,
         verifiedRisk: s.risk,
       })),
+      marketIntelligence: input.market
+        ? {
+            regime: input.market.regime,
+            observedAt: new Date(input.market.at).toISOString(),
+            cournot: input.market.cournot,
+            riskFactors: input.market.scores.map((x) => ({ strategy: x.address, name: x.name, liveRisk: x.risk, factors: x.factors })),
+          }
+        : null,
+      memory: input.memory ? { market: input.memory.market, decisions: input.memory.decisions } : null,
     },
     null,
     2,
@@ -147,6 +178,9 @@ async function askClaude(input: DecisionInput, trigger: string) {
   const text = response.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
   return { parsed: ProposalSchema.parse(JSON.parse(text)), model: response.model };
 }
+
+const marketSummary = (input: DecisionInput) =>
+  input.market ? { regime: input.market.regime, at: input.market.at, cournot: input.market.cournot } : null;
 
 const cache = new Map<string, Proposal>();
 const CACHE_MS = 120_000;
@@ -189,6 +223,8 @@ export async function propose(input: DecisionInput): Promise<Proposal> {
           validation,
           baseline,
           createdAt: Date.now(),
+          market: marketSummary(input),
+          memory: input.memory ?? null,
         };
       } else {
         llmRejected = { error: validation.error, detail: validation.detail };
@@ -214,6 +250,8 @@ export async function propose(input: DecisionInput): Promise<Proposal> {
       validation,
       baseline,
       createdAt: Date.now(),
+      market: marketSummary(input),
+      memory: input.memory ?? null,
     };
   }
   cache.set(key, proposal);

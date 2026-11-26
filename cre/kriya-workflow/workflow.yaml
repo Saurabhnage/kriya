@@ -21,3 +21,11 @@ monad-settings:
     workflow-path: "./main.ts"
     config-path: "./config.monad.json"
     secrets-path: ""
+
+bnb-settings:
+  user-workflow:
+    workflow-name: "kriya-workflow-bnb"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.bnb.json"
+    secrets-path: ""

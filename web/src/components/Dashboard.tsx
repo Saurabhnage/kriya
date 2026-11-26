@@ -12,6 +12,7 @@ import { LoopPipeline } from "./dashboard/LoopPipeline";
 import { DecisionCard } from "./dashboard/DecisionCard";
 import { ActivityTimeline } from "./dashboard/ActivityTimeline";
 import { StageBar } from "./dashboard/StageBar";
+import { MarketPanel } from "./dashboard/MarketPanel";
 import { Panel } from "./dashboard/shared";
 import { RiskChart } from "./charts/RiskChart";
 
@@ -101,6 +102,7 @@ export function Dashboard({ state, user, readOnly, refresh, onRunningChange }: P
           <ActivityTimeline items={state.activity} />
         </div>
       </div>
+      <MarketPanel state={state} readOnly={readOnly} onChanged={refresh} />
       <StageBar
         state={state}
         readOnly={readOnly}
