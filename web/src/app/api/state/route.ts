@@ -42,13 +42,20 @@ export async function GET(request: Request) {
       : null;
 
     const executions = riskHistory.filter((p) => p.kind === "execution");
-    const firstExecutionTs = executions[0]?.ts ?? null;
+    const firstExecution = executions[0] ?? null;
+    // Compare chain positions (block numbers), not timestamps: block time can run ahead of the server
+    // clock (e.g. Anvil adds 1s per block under bursts). Old entries without a block fall back to time.
+    const afterFirstExecution = (j: JournalEntry) => {
+      if (!firstExecution) return false;
+      const block = (j.data as { blockNumber?: number } | undefined)?.blockNumber;
+      return typeof block === "number" ? block >= Math.floor(firstExecution.order / 1e6) : j.ts >= firstExecution.ts;
+    };
     const act = deriveAct({
       mandateExists: snap.mandate.exists,
       allocated: snap.health.allocated,
       violated: snap.health.violated,
       pendingViolated: pending?.violated ?? false,
-      guardrailShown: firstExecutionTs !== null && journal.some((j) => j.kind === "guardrail" && j.ts >= firstExecutionTs),
+      guardrailShown: journal.some((j) => j.kind === "guardrail" && afterFirstExecution(j)),
       feedMatchesOnchain: snap.strategies.every((s) => (feed.risks[s.address.toLowerCase()] ?? s.risk) === s.risk),
       lastExecutionAt: executions.at(-1)?.order ?? null,
       lastRiskChangeAt: lastBreachAt(riskHistory),

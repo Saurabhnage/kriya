@@ -254,6 +254,8 @@ export async function guardrailTest(user: Address) {
     title: `Guardrail test: unsafe proposal (Strategy B 60%) ${receipt.status === "reverted" ? "REVERTED onchain" : "was not reverted"}`,
     detail: reason,
     txHash: hash,
+    // chain position, so "did the guardrail run after the allocation?" never compares block time with wall time
+    data: { blockNumber: Number(receipt.blockNumber) },
   });
   return { hash, status: receipt.status, reason };
 }
